@@ -1,0 +1,57 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/DigitalCopyright?allowPublicKeyRetrieval=true&useSSL=false
+    username: root
+    password:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+  mail:
+    limit: 2
+    limitTime: 10
+    host: smtp.qq.com
+    port: 465
+    username: 847070349@qq.com
+    password: cgmlggsnvctpbahf
+    protocol: smtp
+    properties:
+        mail:
+          smtp:
+            auth: true
+            starttls:
+              enable: true
+            socketFactory:
+              class: javax.net.ssl.SSLSocketFactory
+              port: 465
+              fallback: false
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:/mapper/*.xml
+
+server:
+  port: 8080
+
+
+logging:
+  level:
+    org.springframework.mail: DEBUG
+    org.springframework: DEBUG
+
+jwt:
+  secret: sakura20040408
+  expiration:  7 * 24 * 60 * 60 * 1000L
+
+webase:
+  url: http://192.168.126.140:5002/WeBASE-Front/trans/handle
+  contractAddress: 0xbfb7b7a1259664922d5b56b900e640fb94c11276
+
+fisco:
+  config:
+    path: classpath:config-example.toml
+
+keystore:
+  basePath:
