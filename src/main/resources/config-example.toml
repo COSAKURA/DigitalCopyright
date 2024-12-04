@@ -18,7 +18,7 @@ certPath = "conf"                           # The certification path
 # default load the GM SSL encryption privateKey from ${certPath}/gm/gmensdk.key
 
 [network]
-peers=["192.168.126.140:20200","192.168.126.140:20201"]    # The peer list to connect
+peers=["192.168.126.143:20200","192.168.126.143:20201"]    # The peer list to connect
 caCert = "conf/ca.crt"
 sslCert = "conf/sdk.crt"
 sslKey = "conf/sdk.key"

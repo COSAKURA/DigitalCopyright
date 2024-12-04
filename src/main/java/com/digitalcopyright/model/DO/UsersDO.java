@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.BitSet;
 
 /**
  * <p>
@@ -38,9 +39,13 @@ public class UsersDO implements Serializable {
 
     private String blockchainAddress;
 
+    private String type;
+
     private String createdAt;
 
-    private String type;
+    private String status;
+
+
 
 
 }

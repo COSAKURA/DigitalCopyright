@@ -23,7 +23,7 @@ public class SecurityConfig {
         http
                 .csrf().disable()  // 禁用 CSRF 防护
                 .authorizeRequests()
-                .requestMatchers("/*").permitAll()  // 放行接口
+                .requestMatchers("/**").permitAll()  // 放行接口
                 .anyRequest().authenticated()  // 其他请求需要认证
                 .and()
                 .exceptionHandling()

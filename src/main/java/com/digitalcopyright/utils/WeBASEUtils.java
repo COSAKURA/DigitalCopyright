@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * 工具类：用于与 WeBASE 平台交互，发送 HTTP POST 请求调用链上合约方法。
+ * @author Sakura
  */
 @Service
 public class WeBASEUtils {
@@ -27,7 +28,7 @@ public class WeBASEUtils {
     private String webaseUrl;
 
     // 从配置文件中注入合约地址
-    @Value("${webase.contractAddress}")
+    @Value("${fisco.contract.address}")
     private String contractAddress;
 
     // ABI 文件内容（合约的应用二进制接口）

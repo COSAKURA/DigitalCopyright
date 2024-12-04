@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/user")
 public class RegisterController {
 
     private final UsersService usersService;
@@ -55,40 +55,52 @@ public class RegisterController {
     public R emailCode(@RequestBody GetEmailCodeDTO getEmailCode) {
         String email = getEmailCode.getEmail();
         String username = getEmailCode.getUsername();
+        long currentTime = System.currentTimeMillis();
+
         // 检查内存中是否存在该邮箱的验证码记录
         if (emailCodeStore.containsKey(email)) {
             EmailCodeDTO emailCode = emailCodeStore.get(email);
 
+            // 校验验证码是否超时
+            if (currentTime - emailCode.getTimestamp() > limitTime) {
+                // 验证码超时，移除并返回错误
+                emailCodeStore.remove(email);
+                return R.error(BizCodeEnum.OVER_TIME.getCode(), BizCodeEnum.OVER_TIME.getMsg());
+            }
+
             // 如果验证码请求次数超过限制，返回错误
             if (emailCode.getTimes() >= limit) {
                 return R.error(BizCodeEnum.OVER_REQUESTS.getCode(), BizCodeEnum.OVER_REQUESTS.getMsg());
-            } else {
-                String code = CodeUtils.creatCode(6);
-                emailCode.setEmailCode(code);
-                emailCode.setTimes(emailCode.getTimes() + 1);
-                // 更新验证码记录
-                emailCodeStore.put(email, emailCode);
-                // 发送验证码邮件
-                mailService.sendCodeMailMessage(email, code);
             }
+
+            // 更新验证码及请求次数
+            String code = CodeUtils.creatCode(6);
+            emailCode.setEmailCode(code);
+            emailCode.setTimes(emailCode.getTimes() + 1);
+            emailCode.setTimestamp(currentTime);
+            emailCodeStore.put(email, emailCode);
+
+            // 发送验证码邮件
+            mailService.sendCodeMailMessage(email, code);
         } else {
             // 检查数据库中是否存在该用户名
             UsersDO user = usersService.getOne(new QueryWrapper<UsersDO>().eq("username", username));
             if (user != null) {
                 return R.error(BizCodeEnum.HAS_USERNAME.getCode(), BizCodeEnum.HAS_USERNAME.getMsg());
-            } else {
-                // 生成新的验证码
-                String code = CodeUtils.creatCode(6);
-                EmailCodeDTO emailCod = new EmailCodeDTO(code, username, email, 1,System.currentTimeMillis());
-                // 存储验证码记录（以邮箱作为键）
-                emailCodeStore.put(email, emailCod);
-                // 发送验证码邮件
-                mailService.sendCodeMailMessage(email, code);
             }
+
+            // 生成新的验证码
+            String code = CodeUtils.creatCode(6);
+            EmailCodeDTO emailCod = new EmailCodeDTO(code, username, email, 1, currentTime);
+            emailCodeStore.put(email, emailCod);
+
+            // 发送验证码邮件
+            mailService.sendCodeMailMessage(email, code);
         }
 
         return R.ok(BizCodeEnum.SUCCESSFUL.getMsg());
     }
+
 
     // 注册账号
     @PostMapping("/register")
@@ -130,6 +142,7 @@ public class RegisterController {
         user.setPassword(SecurityUtils.encodePassword(register.getPassword().trim()));
         user.setType(register.getType());
         user.setCreatedAt(DateUtils.getCurrentTime());
+        user.setStatus("正常");
         usersService.save(user);
 
         // 注册成功后，删除验证码记录

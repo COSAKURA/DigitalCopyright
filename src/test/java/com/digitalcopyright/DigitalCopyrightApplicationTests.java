@@ -1,6 +1,9 @@
 package com.digitalcopyright;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.digitalcopyright.fisco.DigitalCopyright;
+import com.digitalcopyright.mapper.WorksMapper;
+import com.digitalcopyright.model.DO.WorksDO;
 import com.digitalcopyright.utils.KeystoreUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple10;
@@ -12,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigInteger;
+import java.time.LocalDateTime;
 
 @Slf4j
 @SpringBootTest
@@ -20,10 +24,14 @@ class DigitalCopyrightApplicationTests {
     @Autowired
     private Client client1;
 
+    @Autowired
+    private WorksMapper worksMapper;
+
     @Test
     public void testGetWorkDetailsWithUserKey() throws Exception {
         // 用户提供的地址和私钥
-        String userPrivateKey = KeystoreUtils.loadPrivateKeyFromKeystore("D:/数字创意作品链上版权认证与交易平台/私钥/keystore-b045f7af-8eb6-4cf9-9551-ad00d1debf7f.json", "sakura0000001");
+        String userPrivateKey = KeystoreUtils.loadPrivateKeyFromKeystore("D:/数字创意作品链上版权认证与交易平台/私钥/keystore-8e6c9d20" +
+                "-3b2c-490a-94c8-dbda89b81222.json", "wyh123456");
 
         // 使用用户私钥创建 KeyPair
         CryptoSuite cryptoSuite = client1.getCryptoSuite();
@@ -55,4 +63,6 @@ class DigitalCopyrightApplicationTests {
         System.out.println("Created At: " + details.getValue9());
         System.out.println("Is On Auction: " + details.getValue10());
     }
+
+
 }

@@ -34,6 +34,7 @@ public class MailServiceImpl implements MailService {
      */
     @Override
     public void sendCodeMailMessage(String recipient, String code) {
+
         // 校验参数
         if (recipient == null || recipient.trim().isEmpty()) {
             throw new IllegalArgumentException("收件人邮箱不能为空");
@@ -139,20 +140,5 @@ public class MailServiceImpl implements MailService {
             logger.error("验证码邮件发送失败：{}", e.getMessage(), e);
             throw new RuntimeException("验证码邮件发送失败", e);
         }
-    }
-
-    @Override
-    public void sendTextMailMessage(String to, String subject, String text) {
-
-    }
-
-    @Override
-    public void sendHtmlMailMessage(String to, String subject, String content) {
-
-    }
-
-    @Override
-    public void sendAttachmentMailMessage(String to, String subject, String content, String filePath) {
-
     }
 }
