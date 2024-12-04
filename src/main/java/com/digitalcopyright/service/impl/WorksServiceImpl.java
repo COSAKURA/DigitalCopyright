@@ -107,10 +107,15 @@ public class WorksServiceImpl implements WorksService {
      * 保存图片到本地并返回文件路径
      */
     private Path saveImageToLocal(MultipartFile img) throws Exception {
-        String uploadDir = "D:\\数字创意作品链上版权认证与交易平台\\图片";
+        // 使用项目根目录动态指定上传路径
+        String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
+
+        // 创建文件夹（如果不存在）
         File directory = new File(uploadDir);
         if (!directory.exists()) {
-            directory.mkdirs(); // 如果目录不存在，创建它
+            if (!directory.mkdirs()) {
+                throw new RuntimeException("创建目录失败");
+            }
         }
 
         String filename = System.currentTimeMillis() + "_" + img.getOriginalFilename();
@@ -207,7 +212,6 @@ public class WorksServiceImpl implements WorksService {
             CryptoKeyPair adminKeyPair = client.getCryptoSuite().createKeyPair(adminPrivate);
             DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, adminKeyPair);
             log.info("加载合约成功，地址: {}", CONTRACT_ADDRESS);
-
             // 验证作品 ID 是否有效
             BigInteger workCount = digitalCopyright.workCounter();
             if (workId.compareTo(BigInteger.ZERO) <= 0 || workId.compareTo(workCount) > 0) {
@@ -216,7 +220,6 @@ public class WorksServiceImpl implements WorksService {
 
             // 获取作品详情
             var details = digitalCopyright.getWorkDetails(workId);
-            log.info("获取作品详情成功，作品 ID: {}", workId);
 
             // 验证区块链地址
             String userAddress = details.getValue5();

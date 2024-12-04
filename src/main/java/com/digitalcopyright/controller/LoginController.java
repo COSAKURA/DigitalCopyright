@@ -32,6 +32,7 @@ public class LoginController {
      */
     @PostMapping("/login")
     public R login(@RequestBody LoginDTO login) {
+        log.info("用户登录: {}", login.getEmail());
         try {
             return usersService.login(login);
         } catch (IllegalArgumentException e) {

@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.digitalcopyright.common.BizCodeEnum;
 import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.model.DTO.EmailCodeDTO;
-import com.digitalcopyright.model.DTO.GetEmailCodeDTO;
 import com.digitalcopyright.model.DTO.RegisterDTO;
 import com.digitalcopyright.service.MailService;
 import com.digitalcopyright.service.UsersService;
@@ -15,10 +14,7 @@ import com.digitalcopyright.utils.DateUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,10 +47,10 @@ public class RegisterController {
         this.mailService = mailService;
     }
 
-    @RequestMapping("/emailCode")
-    public R emailCode(@RequestBody GetEmailCodeDTO getEmailCode) {
-        String email = getEmailCode.getEmail();
-        String username = getEmailCode.getUsername();
+    @PostMapping("/emailCode")
+    public R emailCode(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        log.info("邮箱：{}",email);
         long currentTime = System.currentTimeMillis();
 
         // 检查内存中是否存在该邮箱的验证码记录
@@ -84,14 +80,14 @@ public class RegisterController {
             mailService.sendCodeMailMessage(email, code);
         } else {
             // 检查数据库中是否存在该用户名
-            UsersDO user = usersService.getOne(new QueryWrapper<UsersDO>().eq("username", username));
+            UsersDO user = usersService.getOne(new QueryWrapper<UsersDO>().eq("email", email));
             if (user != null) {
                 return R.error(BizCodeEnum.HAS_USERNAME.getCode(), BizCodeEnum.HAS_USERNAME.getMsg());
             }
 
             // 生成新的验证码
             String code = CodeUtils.creatCode(6);
-            EmailCodeDTO emailCod = new EmailCodeDTO(code, username, email, 1, currentTime);
+            EmailCodeDTO emailCod = new EmailCodeDTO(code, email, 1, currentTime);
             emailCodeStore.put(email, emailCod);
 
             // 发送验证码邮件
@@ -105,10 +101,9 @@ public class RegisterController {
     // 注册账号
     @PostMapping("/register")
     public R register(@RequestBody RegisterDTO register) {
-        String username = register.getUsername().trim();
+
         String email = register.getEmail().trim();
         String emailCode = register.getEmailCode().trim();
-        log.info("用户注册信息：{},{},{}", username, email, emailCode);
 
         // 检验验证码是否存在
         if (!emailCodeStore.containsKey(email)) {
@@ -125,8 +120,8 @@ public class RegisterController {
             return R.error(BizCodeEnum.OVER_TIME.getCode(), BizCodeEnum.OVER_TIME.getMsg());
         }
 
-        // 校验用户名是否匹配
-        if (!username.equals(storedEmailCode.getUsername())) {
+        // 校验邮箱号是否匹配
+        if (!email.equals(storedEmailCode.getEmail())) {
             return R.error(BizCodeEnum.BAD_DOING.getCode(), BizCodeEnum.BAD_DOING.getMsg());
         }
 
@@ -138,7 +133,7 @@ public class RegisterController {
         // 验证通过，封装用户信息并存储
         UsersDO user = new UsersDO();
         user.setEmail(email);
-        user.setUsername(username);
+        user.setUsername(register.getUsername());
         user.setPassword(SecurityUtils.encodePassword(register.getPassword().trim()));
         user.setType(register.getType());
         user.setCreatedAt(DateUtils.getCurrentTime());

@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmailCodeDTO {
     private String emailCode;
-    private String username;
     @NotNull(message = "用户邮箱不能为空")
     @Email(message = "邮箱格式错位")
     private String email;
