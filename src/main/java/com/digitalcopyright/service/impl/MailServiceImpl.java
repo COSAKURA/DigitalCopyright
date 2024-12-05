@@ -14,6 +14,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+/**
+ * @author Sakura
+ */
 @Service
 @Slf4j
 public class MailServiceImpl implements MailService {
@@ -129,7 +132,8 @@ public class MailServiceImpl implements MailService {
             helper.setFrom(senderEmail);
             helper.setTo(recipient);
             helper.setSubject(subject);
-            helper.setText(text, true); // 设置为 HTML 格式
+            // 设置为 HTML 格式
+            helper.setText(text, true);
             helper.setSentDate(new Date());
 
             // 发送邮件
