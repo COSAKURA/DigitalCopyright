@@ -27,7 +27,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import static org.fisco.bcos.sdk.utils.AddressUtils.isValidAddress;
 
@@ -51,13 +55,13 @@ public class WorksServiceImpl implements WorksService {
     private  String adminPrivate;
 
     @Override
-    public void registerWork(RegisterWorkDTO registerWorkDTO) {
+    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email) {
         // 根据邮箱查找用户
-        UsersDO user = fetchUserByEmail(registerWorkDTO.getEmail());
+        UsersDO user = fetchUserByEmail(email);
 
         try {
             // 保存图片并获取文件路径
-            Path filePath = saveImageToLocal(registerWorkDTO.getImg());
+            Path filePath = saveImageToLocal(file);
 
             // 计算图片哈希值
             String hash = calculateImageHash(filePath);
@@ -65,30 +69,38 @@ public class WorksServiceImpl implements WorksService {
             // 检查哈希值是否已存在
             validateImageHash(hash);
 
-            // 从 DTO 获取用户私钥并生成 KeyPair
-            CryptoKeyPair userKeyPair = createKeyPair(registerWorkDTO.getPrivateKey());
+            // 从私钥生成 KeyPair
+            CryptoKeyPair userKeyPair = createKeyPair(privateKey);
 
             // 加载智能合约
             DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, userKeyPair);
 
             // 调用智能合约上传作品
             TransactionReceipt receipt = digitalCopyright.registerWork(
-                    registerWorkDTO.getTitle(),
-                    registerWorkDTO.getDescription(),
+                    title,
+                    description,
                     hash
             );
 
             // 获取链上返回的作品 ID 和交易哈希
             BigInteger workIdOnChain = getWorkIdFromReceipt(digitalCopyright);
 
+            // 构建 RegisterWorkDTO
+            RegisterWorkDTO registerWorkDTO = new RegisterWorkDTO();
+            registerWorkDTO.setTitle(title);
+            registerWorkDTO.setDescription(description);
+
             // 保存作品信息到数据库
             saveWorkToDatabase(registerWorkDTO, user, filePath, hash, workIdOnChain, receipt.getTransactionHash());
+
         } catch (IllegalArgumentException e) {
             throw e; // 直接抛出业务异常
         } catch (Exception e) {
             throw new RuntimeException("作品注册失败: " + e.getMessage(), e);
         }
     }
+
+
 
     /**
      * 根据邮箱获取用户信息
@@ -343,6 +355,35 @@ public class WorksServiceImpl implements WorksService {
         return "Copr" + startYear + currentYear + String.format("%07d", timestamp % 10000000 + randomPart);
     }
 
+    @Override
+    public List<Map<String, Object>> getUserWorksByEmail(String email) {
+        // 根据邮箱查询用户信息
+        UsersDO user = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("email", email));
+        if (user == null) {
+            throw new IllegalArgumentException("用户不存在");
+        }
+
+        // 查询用户的作品信息
+        List<WorksDO> userWorks = worksMapper.selectList(
+                new QueryWrapper<WorksDO>().eq("user_id", user.getId())
+        );
+
+        // 只返回指定字段的信息
+        return userWorks.stream().map(work -> {
+            Map<String, Object> workMap = new HashMap<>();
+            workMap.put("workId", work.getWorkId());
+            workMap.put("title", work.getTitle());
+            workMap.put("description", work.getDescription());
+            workMap.put("imagePath", work.getImgUrl());
+            workMap.put("workHash", work.getHash());
+            workMap.put("blockchainHash", work.getBlockchainHash());
+            workMap.put("digitalCopyrightId", work.getDigitalCopyrightId());
+            workMap.put("transactionHash", work.getTransactionHash());
+            workMap.put("isOnAuction", work.getIsOnAuction());
+            workMap.put("createdAt", work.getCreatedAt());
+            return workMap;
+        }).collect(Collectors.toList());
+    }
 
 }
 

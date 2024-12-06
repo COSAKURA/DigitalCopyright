@@ -8,9 +8,13 @@ import com.digitalcopyright.service.WorksService;
 import com.digitalcopyright.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/work")
@@ -22,21 +26,30 @@ public class WorksController {
 
     /**
      * 用户上传作品并保存，同时进行作品上链。
-     *
-     * @param registerWorkDTO 注册作品的DTO，包括邮箱、标题、描述
      * @return 操作结果
      */
-    @PostMapping("/registerWork")
-    public R registerWork(@ModelAttribute RegisterWorkDTO registerWorkDTO) {
+    @PostMapping(value = "/registerWork", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public R uploadWork(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("privateKey") String privateKey,
+            @RequestParam("email") String email
+    )
+    {
         try {
-            worksService.registerWork(registerWorkDTO);
-            return R.ok("作品注册成功");
+            log.info("email:{}",email);
+            log.info("title:{}",title);
+            log.info("description:{}",description);
+            log.info("privateKey:{}",privateKey);
+            log.info("file:{}",file);
+            // 调用服务层逻辑
+            worksService.registerWork(file, title, description, privateKey, email);
+            return R.ok("作品上传成功");
         } catch (IllegalArgumentException e) {
-            log.error("参数校验异常: {}", e.getMessage());
-            return R.error(BizCodeEnum.VAILD_EXCEPTION.getCode(), e.getMessage());
+            return R.error(400, e.getMessage());
         } catch (Exception e) {
-            log.error("作品注册失败: {}", e.getMessage(), e);
-            return R.error(BizCodeEnum.UNKNOW_EXCEPTION.getCode(), BizCodeEnum.UNKNOW_EXCEPTION.getMsg());
+            return R.error(500, "作品上传失败: " + e.getMessage());
         }
     }
 
@@ -80,6 +93,26 @@ public class WorksController {
         }
     }
 
+    /**
+     * 获取用户所有作品
+     *
+     * @param email 用户邮箱
+     * @return 用户作品列表
+     */
+    @GetMapping("/userWorksAll")
+    public R getUserWorks(@RequestParam String email) {
+        try {
+            // 调用 Service 获取作品列表
+            List<Map<String, Object>> worksData = worksService.getUserWorksByEmail(email);
+            return R.ok("获取用户作品列表成功").put("data", worksData);
+        } catch (IllegalArgumentException e) {
+            log.error("参数校验异常: {}", e.getMessage());
+            return R.error(BizCodeEnum.VAILD_EXCEPTION.getCode(), e.getMessage());
+        } catch (Exception e) {
+            log.error("获取用户作品列表失败: {}", e.getMessage(), e);
+            return R.error(BizCodeEnum.UNKNOW_EXCEPTION.getCode(), BizCodeEnum.UNKNOW_EXCEPTION.getMsg());
+        }
+    }
 
 
 }
