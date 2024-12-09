@@ -5,6 +5,7 @@ import com.digitalcopyright.mapper.UsersMapper;
 import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.service.KeystoreService;
 import com.digitalcopyright.utils.KeystoreUtils;
+import jakarta.annotation.Resource;
 import org.fisco.bcos.sdk.crypto.CryptoSuite;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,10 @@ import java.util.UUID;
 @Service
 public class KeystoreServiceImpl implements KeystoreService {
 
-    @Autowired
+    @Resource
     private CryptoSuite cryptoSuite;
 
-    @Autowired
+    @Resource
     private UsersMapper usersMapper;
 
     private static final String BASE_PATH = "D:/数字创意作品链上版权认证与交易平台/私钥/";

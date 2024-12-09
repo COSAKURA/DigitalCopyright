@@ -1,6 +1,7 @@
 package com.digitalcopyright.service.impl;
 
 import com.digitalcopyright.service.MailService;
+import jakarta.annotation.Resource;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,7 @@ public class MailServiceImpl implements MailService {
 
     private static final Logger logger = LoggerFactory.getLogger(MailServiceImpl.class);
 
-    @Autowired
+    @Resource
     private JavaMailSender mailSender;
 
     @Value("${spring.mail.username}")

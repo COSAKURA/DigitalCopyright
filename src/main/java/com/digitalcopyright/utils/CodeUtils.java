@@ -1,6 +1,5 @@
 package com.digitalcopyright.utils;
 
-import org.springframework.stereotype.Component;
 
 import java.util.Random;
 

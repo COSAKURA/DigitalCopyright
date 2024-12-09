@@ -41,9 +41,6 @@ logging:
     org.springframework.mail: DEBUG
     org.springframework: DEBUG
 
-jwt:
-  secret: sakura20040408
-  expiration:  7 * 24 * 60 * 60 * 1000L
 
 webase:
   url: http://192.168.126.143:5002/WeBASE-Front/trans/handle

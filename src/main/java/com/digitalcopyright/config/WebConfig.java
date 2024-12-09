@@ -2,6 +2,7 @@ package com.digitalcopyright.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -34,5 +35,12 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")  // 允许所有请求头，提升兼容性
                 .allowCredentials(true) // 允许发送 Cookie 或身份凭证
                 .maxAge(3600); // 预检请求的缓存时间，单位秒
+    }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // 配置静态资源路径映射
+        // 例如：将 uploads 目录映射到 /uploads 路径
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:/D:/数字创意作品链上版权认证与交易平台/DigitalCopyright/uploads/");
     }
 }

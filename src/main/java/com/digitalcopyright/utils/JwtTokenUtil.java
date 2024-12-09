@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Sakura
+ */
 public class JwtTokenUtil {
 
     private static String secret;

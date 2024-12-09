@@ -6,6 +6,7 @@ import com.digitalcopyright.model.DTO.RegisterWorkDTO;
 import com.digitalcopyright.model.VO.WorkDetailsVO;
 import com.digitalcopyright.service.WorksService;
 import com.digitalcopyright.utils.R;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -21,7 +22,7 @@ import java.util.Map;
 @Slf4j
 public class WorksController {
 
-    @Autowired
+    @Resource
     private WorksService worksService;
 
     /**

@@ -5,15 +5,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.digitalcopyright.common.BizCodeEnum;
 import com.digitalcopyright.mapper.UsersMapper;
 import com.digitalcopyright.model.DO.UsersDO;
-import com.digitalcopyright.model.DTO.EmailCodeDTO;
 import com.digitalcopyright.model.DTO.LoginDTO;
-import com.digitalcopyright.model.DTO.RegisterDTO;
-import com.digitalcopyright.service.MailService;
 import com.digitalcopyright.service.UsersService;
-import com.digitalcopyright.utils.DateUtils;
 import com.digitalcopyright.utils.JwtTokenUtil;
 import com.digitalcopyright.utils.R;
 import com.digitalcopyright.utils.SecurityUtils;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,13 +25,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UsersServiceImpl extends ServiceImpl<UsersMapper, UsersDO> implements UsersService {
 
-    @Autowired
+    @Resource
     private UsersMapper usersMapper;
-
-    @Autowired
-    private MailService mailService;
-
-
 
     @Override
     public R login(LoginDTO login) {

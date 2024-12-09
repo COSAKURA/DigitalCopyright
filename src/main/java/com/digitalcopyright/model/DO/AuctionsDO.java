@@ -6,10 +6,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.web3j.abi.datatypes.Int;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -23,7 +26,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("auctions") // 指定表名为 works
+@TableName("auctions") // 指定表名为 auctions
 public class AuctionsDO implements Serializable {
 
     @Serial
@@ -32,17 +35,17 @@ public class AuctionsDO implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    private Integer workId;
+    private BigInteger workId;
 
     private Integer sellerId;
 
-    private BigDecimal startPrice;
+    private BigInteger startPrice;
 
-    private BigDecimal currentPrice;
+    private BigInteger currentPrice;
 
     private Integer buyerId;
 
-    private Date endTime;
+    private LocalDateTime endTime;
 
     /**
      * 0 - active, 1 - ended
@@ -50,6 +53,8 @@ public class AuctionsDO implements Serializable {
     private Integer status;
 
     private String transactionHash;
+
+    private BigInteger auctionId;
 
 
 }

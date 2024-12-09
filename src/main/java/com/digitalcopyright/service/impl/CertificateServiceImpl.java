@@ -6,6 +6,7 @@ import com.digitalcopyright.mapper.UsersMapper;
 import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.service.CertificateService;
 import com.digitalcopyright.utils.PdfUtil;
+import jakarta.annotation.Resource;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple10;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -18,10 +19,10 @@ import java.math.BigInteger;
 @Service
 public class CertificateServiceImpl implements CertificateService {
 
-    @Autowired
+    @Resource
     private UsersMapper usersMapper;
 
-    @Autowired
+    @Resource
     private Client client;
 
     @Value("${fisco.contract.address}")
@@ -65,7 +66,7 @@ public class CertificateServiceImpl implements CertificateService {
                     details.getValue3(), // 描述
                     details.getValue5(), // 拥有者
                     details.getValue4(), // 作品哈希
-                    details.getValue4(), // 版权编号
+                    String.valueOf(details.getValue8()), // 版权编号
                     details.getValue6(), // 审核地址
                     details.getValue9().toString(), // 作品 ID
                     details.getValue4() // 二维码内容（可以替换为作品链接）

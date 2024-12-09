@@ -6,6 +6,7 @@ import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.service.KeystoreService;
 import com.digitalcopyright.service.UsersService;
 import com.digitalcopyright.utils.R;
+import jakarta.annotation.Resource;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,10 @@ import java.util.Objects;
 @RequestMapping("/keystore")
 public class KeystoreController {
 
-    @Autowired
+    @Resource
     private KeystoreService keystoreService;
 
-    @Autowired
+    @Resource
     private UsersMapper usersMapper;
 
     /**
@@ -50,7 +51,7 @@ public class KeystoreController {
 
 
     /**
-     * 上传私钥文件
+     * 验证私钥文件
      *
      * @param email    用户邮箱
      * @param password 用户输入的密码

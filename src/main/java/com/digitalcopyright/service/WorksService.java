@@ -3,6 +3,7 @@ package com.digitalcopyright.service;
 import com.digitalcopyright.model.DO.WorksDO;
 import com.digitalcopyright.model.DTO.RegisterWorkDTO;
 import com.digitalcopyright.model.VO.WorkDetailsVO;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigInteger;
@@ -12,6 +13,7 @@ import java.util.Map;
 /**
  * @author Sakura
  */
+@Service
 public interface WorksService {
     /**
      * 注册作品，包括文件保存、用户绑定、作品入库

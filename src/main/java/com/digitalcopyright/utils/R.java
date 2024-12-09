@@ -1,11 +1,13 @@
 package com.digitalcopyright.utils;
 
-import org.springframework.stereotype.Component;
 
 import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author Sakura
+ */
 public class R extends HashMap<String, Object> {
     @Serial
     private static final long serialVersionUID = 1L;

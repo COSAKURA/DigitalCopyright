@@ -10,6 +10,7 @@ import com.digitalcopyright.model.DTO.RegisterWorkDTO;
 import com.digitalcopyright.model.VO.WorkDetailsVO;
 import com.digitalcopyright.service.WorksService;
 import com.digitalcopyright.utils.EncryptionUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple10;
 import org.fisco.bcos.sdk.client.Client;
@@ -39,13 +40,13 @@ import static org.fisco.bcos.sdk.utils.AddressUtils.isValidAddress;
 @Slf4j
 public class WorksServiceImpl implements WorksService {
 
-    @Autowired
+    @Resource
     private UsersMapper usersMapper;
 
-    @Autowired
+    @Resource
     private WorksMapper worksMapper;
 
-    @Autowired
+    @Resource
     private Client client;
 
     @Value("${fisco.contract.address}")
@@ -61,10 +62,10 @@ public class WorksServiceImpl implements WorksService {
 
         try {
             // 保存图片并获取文件路径
-            Path filePath = saveImageToLocal(file);
+            String filePath = saveImageToLocal(file);
 
             // 计算图片哈希值
-            String hash = calculateImageHash(filePath);
+            String hash = calculateImageHash(Paths.get(System.getProperty("user.dir"), "uploads", filePath));
 
             // 检查哈希值是否已存在
             validateImageHash(hash);
@@ -118,7 +119,7 @@ public class WorksServiceImpl implements WorksService {
     /**
      * 保存图片到本地并返回文件路径
      */
-    private Path saveImageToLocal(MultipartFile img) throws Exception {
+    private String saveImageToLocal(MultipartFile img) throws Exception {
         // 使用项目根目录动态指定上传路径
         String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
 
@@ -130,6 +131,7 @@ public class WorksServiceImpl implements WorksService {
             }
         }
 
+        // 为文件生成唯一的文件名
         String filename = System.currentTimeMillis() + "_" + img.getOriginalFilename();
         Path filePath = Paths.get(uploadDir, filename);
 
@@ -139,9 +141,14 @@ public class WorksServiceImpl implements WorksService {
             throw new IllegalArgumentException("文件类型不支持，仅支持 jpg, png, gif, bmp, webp 格式的图片");
         }
 
-        Files.write(filePath, img.getBytes()); // 保存文件到指定路径
-        return filePath;
+        // 保存文件到指定路径
+        Files.write(filePath, img.getBytes());
+
+        // 返回相对路径，前端可以通过这个路径访问图片
+        return  filename; // 确保返回相对路径
     }
+
+
 
     /**
      * 验证图片类型
@@ -187,12 +194,13 @@ public class WorksServiceImpl implements WorksService {
     /**
      * 保存作品信息到数据库
      */
-    private void saveWorkToDatabase(RegisterWorkDTO dto, UsersDO user, Path filePath, String hash, BigInteger workIdOnChain, String transactionHash) {
+    private void saveWorkToDatabase(RegisterWorkDTO dto, UsersDO user, String filePath, String hash,
+                                    BigInteger workIdOnChain, String transactionHash) {
         WorksDO work = new WorksDO();
         work.setUserId(user.getId());
         work.setTitle(dto.getTitle());
         work.setDescription(dto.getDescription());
-        work.setImgUrl(filePath.toString());
+        work.setImgUrl(filePath);
         work.setHash(hash);
         work.setWorkId(workIdOnChain.intValue());
         work.setBlockchainHash(hash);

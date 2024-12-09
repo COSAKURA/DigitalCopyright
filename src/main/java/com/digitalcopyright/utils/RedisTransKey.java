@@ -1,7 +1,5 @@
 package com.digitalcopyright.utils;
 
-import org.springframework.stereotype.Component;
-
 /**
  * @author Sakura
  */
