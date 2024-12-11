@@ -1,6 +1,7 @@
 package com.digitalcopyright.controller;
 
 import com.digitalcopyright.service.CertificateService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import java.math.BigInteger;
  */
 @RestController
 @RequestMapping("/certificate")
+
+@Slf4j
 public class CertificateController {
 
     private final CertificateService certificateService;

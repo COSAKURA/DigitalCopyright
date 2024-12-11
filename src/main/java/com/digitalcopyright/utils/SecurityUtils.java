@@ -3,6 +3,9 @@ package com.digitalcopyright.utils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author Sakura
+ */
 @Component
 public class SecurityUtils {
     /**

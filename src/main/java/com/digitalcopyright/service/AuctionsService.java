@@ -1,9 +1,7 @@
 package com.digitalcopyright.service;
 
 
-import com.digitalcopyright.model.DO.AuctionsDO;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -27,4 +25,6 @@ public interface AuctionsService {
     void endAuction(String email, BigInteger auctionId, String privateKey);
 
     List<Map<String, Object>> getAllAuctions();
+
+    Map<String, Object> getAuctionById(Integer workId);
 }

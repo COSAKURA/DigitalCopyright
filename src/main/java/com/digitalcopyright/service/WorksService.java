@@ -1,7 +1,5 @@
 package com.digitalcopyright.service;
 
-import com.digitalcopyright.model.DO.WorksDO;
-import com.digitalcopyright.model.DTO.RegisterWorkDTO;
 import com.digitalcopyright.model.VO.WorkDetailsVO;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

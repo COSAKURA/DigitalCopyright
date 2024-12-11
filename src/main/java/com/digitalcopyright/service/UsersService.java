@@ -2,10 +2,7 @@ package com.digitalcopyright.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.digitalcopyright.model.DO.UsersDO;
-import com.digitalcopyright.model.DTO.BindBlockchainAddressDTO;
-import com.digitalcopyright.model.DTO.GetEmailCodeDTO;
 import com.digitalcopyright.model.DTO.LoginDTO;
-import com.digitalcopyright.model.DTO.RegisterDTO;
 import com.digitalcopyright.utils.R;
 import org.springframework.stereotype.Service;
 

@@ -11,7 +11,6 @@ import com.digitalcopyright.utils.JwtTokenUtil;
 import com.digitalcopyright.utils.R;
 import com.digitalcopyright.utils.SecurityUtils;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**

@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * 配置类：将 CryptoSuite 注册为 Spring 的 Bean。
+ * @author Sakura
  */
 @Configuration
 public class CryptoSuiteConfig {

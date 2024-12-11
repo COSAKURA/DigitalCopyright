@@ -2,10 +2,11 @@ package com.digitalcopyright.controller;
 
 
 import com.digitalcopyright.common.BizCodeEnum;
-import com.digitalcopyright.model.DO.AuctionsDO;
+
 import com.digitalcopyright.service.AuctionsService;
 import com.digitalcopyright.utils.R;
 import jakarta.annotation.Resource;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -61,6 +62,7 @@ public class AuctionsController {
             @RequestParam BigInteger bidAmount,
             @RequestParam String privateKey) {
         try {
+
             auctionService.placeBid(email, auctionId, bidAmount, privateKey);
             return R.ok("竞拍成功！");
         } catch (Exception e) {
@@ -115,5 +117,22 @@ public class AuctionsController {
         }
     }
 
+    @GetMapping("/getAuctionById")
+    public R getAuctionById(@RequestParam Integer workId) {
+        try {
+            // 调用 Service 层方法根据拍卖 ID 获取数据
+            Map<String, Object> auction = auctionService.getAuctionById(workId);
+
+            // 如果找不到对应的拍卖数据，返回提示信息
+            if (auction == null) {
+                return R.ok().put("message", "未找到对应的拍卖数据");
+            }
+            // 返回成功并带有拍卖数据
+            return R.ok().put("auction", auction);
+        } catch (Exception e) {
+            // 捕获异常并返回错误信息
+            return R.error("获取拍卖数据失败：" + e.getMessage());
+        }
+    }
 }
 

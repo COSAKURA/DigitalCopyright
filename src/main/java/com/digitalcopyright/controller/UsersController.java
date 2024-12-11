@@ -1,12 +1,10 @@
 package com.digitalcopyright.controller;
 
 
-import com.digitalcopyright.model.DTO.BindBlockchainAddressDTO;
 import com.digitalcopyright.service.KeystoreService;
 import com.digitalcopyright.service.UsersService;
 import com.digitalcopyright.utils.R;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 

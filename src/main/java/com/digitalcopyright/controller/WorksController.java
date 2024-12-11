@@ -1,14 +1,11 @@
 package com.digitalcopyright.controller;
 
 import com.digitalcopyright.common.BizCodeEnum;
-import com.digitalcopyright.model.DO.WorksDO;
-import com.digitalcopyright.model.DTO.RegisterWorkDTO;
 import com.digitalcopyright.model.VO.WorkDetailsVO;
 import com.digitalcopyright.service.WorksService;
 import com.digitalcopyright.utils.R;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +14,9 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author Sakura
+ */
 @RestController
 @RequestMapping("/work")
 @Slf4j
@@ -39,11 +39,6 @@ public class WorksController {
     )
     {
         try {
-            log.info("email:{}",email);
-            log.info("title:{}",title);
-            log.info("description:{}",description);
-            log.info("privateKey:{}",privateKey);
-            log.info("file:{}",file);
             // 调用服务层逻辑
             worksService.registerWork(file, title, description, privateKey, email);
             return R.ok("作品上传成功");

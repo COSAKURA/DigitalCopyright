@@ -3,7 +3,6 @@ package com.digitalcopyright.config;
 import cn.hutool.core.io.resource.ClassPathResource;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

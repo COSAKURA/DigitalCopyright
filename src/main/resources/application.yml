@@ -1,4 +1,11 @@
 spring:
+  devtools:
+    restart:
+      enabled: false
+
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/DigitalCopyright?allowPublicKeyRetrieval=true&useSSL=false
@@ -27,6 +34,13 @@ spring:
               class: javax.net.ssl.SSLSocketFactory
               port: 465
               fallback: false
+
+  ai:
+    ollama:
+      base-url: http://127.0.0.1:11434/
+      chat:
+        options:
+          model: glm4:9b
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -41,9 +55,9 @@ logging:
     org.springframework.mail: DEBUG
     org.springframework: DEBUG
 
-
-webase:
-  url: http://192.168.126.143:5002/WeBASE-Front/trans/handle
+#
+#webase:
+#  url: http://192.168.126.143:5002/WeBASE-Front/trans/handle
 
 
 fisco:

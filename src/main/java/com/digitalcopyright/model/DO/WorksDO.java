@@ -49,7 +49,6 @@ public class WorksDO implements Serializable {
     private String hash;
 
     private String blockchainHash;
-
     /**
      * 0 - pending, 1 - approved
      */

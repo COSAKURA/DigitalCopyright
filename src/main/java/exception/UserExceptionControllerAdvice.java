@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+/**
+ * @author Sakura
+ */
 @RestControllerAdvice(basePackages = "com.digitalcopyright.controller")
 public class UserExceptionControllerAdvice {
 

@@ -298,6 +298,7 @@ public class AuctionsServiceImpl implements AuctionsService {
             Map<String, Object> auctionMap = new HashMap<>();
 
             // 填充作品的标题、描述和区块哈希到返回结果Map中
+            auctionMap.put("workId", work.getWorkId());  // 区块哈希
             auctionMap.put("title", work.getTitle());  // 作品标题
             auctionMap.put("description", work.getDescription());  // 作品描述
             auctionMap.put("blockHash", work.getBlockchainHash());  // 区块哈希
@@ -311,5 +312,38 @@ public class AuctionsServiceImpl implements AuctionsService {
         return resultList;
     }
 
+    @Override
+    public Map<String, Object> getAuctionById(Integer workId) {
+        Map<String, Object> result = new HashMap<>();
+
+        // 查询拍卖数据
+        QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
+        auctionWrapper.eq("work_id", workId);
+        AuctionsDO auction = auctionsMapper.selectOne(auctionWrapper);
+
+        if (auction == null) {
+            throw new RuntimeException("未找到对应的拍卖信息");
+        }
+
+        // 查询作品数据
+        QueryWrapper<WorksDO> workWrapper = new QueryWrapper<>();
+        workWrapper.eq("work_id", workId); // 修复：使用正确的 workWrapper 查询条件
+        WorksDO work = worksMapper.selectOne(workWrapper);
+
+        if (work == null) {
+            throw new RuntimeException("未找到对应的作品信息");
+        }
+
+        // 封装拍卖数据和作品数据到 Map 中
+        result.put("auctionId", auction.getAuctionId());
+        result.put("title", work.getTitle());
+        result.put("description", work.getDescription());
+        result.put("imgUrl", work.getImgUrl());
+        result.put("digitalCopyrightId", work.getDigitalCopyrightId());
+        result.put("startPrice", auction.getStartPrice());
+        result.put("currentPrice", auction.getCurrentPrice());
+        result.put("endTime", auction.getEndTime());
+        return result;
+    }
 
 }
