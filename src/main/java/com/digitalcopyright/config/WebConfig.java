@@ -28,7 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/**") // 匹配所有接口
                 .allowedOrigins(
                         "http://localhost:8089",         // 本地开发环境
-                        "http://172.46.225.94:8089"      // 部署的前端地址（使用域名）
+                        "http://172.46.225.94:8089",      // 部署的前端地址（使用域名）
+                        "http://172.46.225.96:8089",
+                        "http://172.46.225.92:8089"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 允许的 HTTP 方法
                 .allowedHeaders("*")  // 允许所有请求头，提升兼容性

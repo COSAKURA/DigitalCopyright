@@ -197,8 +197,6 @@ public class AuctionsServiceImpl implements AuctionsService {
         if (auctionsMapper.updateById(auction) == 0) {
             throw new RuntimeException("更新拍卖记录失败");
         }
-
-        System.out.println("竞拍成功，当前出价: " + bidAmount);
     }
 
     @Override
