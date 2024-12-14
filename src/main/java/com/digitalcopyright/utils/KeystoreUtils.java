@@ -1,5 +1,6 @@
 package com.digitalcopyright.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 
@@ -15,6 +16,8 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.util.Base64;
 
+
+@Slf4j
 public class KeystoreUtils {
 
     static {
@@ -29,10 +32,10 @@ public class KeystoreUtils {
      *
      * @param keyPair     区块链密钥对
      * @param password    用于生成加密密钥的密码
-     * @param keystorePath Keystore 文件保存路径
      * @throws Exception 发生异常时抛出
+     * generateKeystore
      */
-    public static void generateKeystore(CryptoKeyPair keyPair, String password, String keystorePath) throws Exception {
+    public static String generateKeystore(CryptoKeyPair keyPair, String password) throws Exception {
         // 将私钥转换为字节数组
         byte[] privateKeyData = keyPair.getHexPrivateKey().getBytes(StandardCharsets.UTF_8);
 
@@ -54,12 +57,11 @@ public class KeystoreUtils {
         String encodedIV = Base64.getEncoder().encodeToString(iv);
         String encodedEncryptedData = Base64.getEncoder().encodeToString(encryptedData);
         String keystoreContent = encodedIV + ":" + encodedEncryptedData;
-
-        try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
-            fos.write(keystoreContent.getBytes(StandardCharsets.UTF_8));
-        }
-
-        System.out.println("Keystore 文件已生成: " + keystorePath);
+        //
+        // try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
+        //     fos.write(keystoreContent.getBytes(StandardCharsets.UTF_8));
+        // }
+        return keystoreContent;
     }
 
     /**

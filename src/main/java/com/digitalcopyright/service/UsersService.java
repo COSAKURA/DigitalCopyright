@@ -21,4 +21,11 @@ public interface UsersService extends IService<UsersDO> {
 
     R login(LoginDTO login);
 
+    /**
+     * 根据邮箱查询用户信息
+     *
+     * @param email 用户邮箱
+     * @return 用户信息
+     */
+    UsersDO getUserByEmail(String email);
 }

@@ -1,6 +1,7 @@
 package com.digitalcopyright.controller;
 
 
+import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.service.KeystoreService;
 import com.digitalcopyright.service.UsersService;
 import com.digitalcopyright.utils.R;
@@ -55,5 +56,28 @@ public class UsersController {
         }
     }
 
+
+    /**
+     * 获取用户信息
+     *
+     * @param email 用户邮箱
+     * @return 用户信息
+     */
+    @GetMapping("/getUserInfo")
+    public R getUserInfo(@RequestParam("email") String email) {
+        try {
+            // 调用 Service 获取用户信息
+            UsersDO user = usersService.getUserByEmail(email);
+
+            if (user == null) {
+                return R.error(404, "用户不存在");
+            }
+
+            // 返回用户信息
+            return R.ok().put("user", user);
+        } catch (Exception e) {
+            return R.error(500, "获取用户信息失败: " + e.getMessage());
+        }
+    }
 }
 

@@ -71,4 +71,17 @@ public class UsersServiceImpl extends ServiceImpl<UsersMapper, UsersDO> implemen
         }
     }
 
+        /**
+         * 根据邮箱查询用户信息
+         *
+         * @param email 用户邮箱
+         * @return 用户信息
+         */
+        @Override
+        public UsersDO getUserByEmail(String email) {
+            // 使用 MyBatis-Plus 的 LambdaQueryWrapper 查询
+            return this.lambdaQuery()
+                    .eq(UsersDO::getEmail, email)
+                    .one();
+        }
 }

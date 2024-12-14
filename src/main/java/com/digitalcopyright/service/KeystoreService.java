@@ -17,4 +17,5 @@ public interface KeystoreService {
     String generateKeystoreAndUpdateUser(String email, String password) throws Exception;
 
     String loadKeyPairFromKeystore(MultipartFile file, String password, String blockchainAddress) throws IOException;
+
 }

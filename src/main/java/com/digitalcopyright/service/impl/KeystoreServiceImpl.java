@@ -11,6 +11,7 @@ import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +30,8 @@ public class KeystoreServiceImpl implements KeystoreService {
     @Resource
     private UsersMapper usersMapper;
 
-    private static final String BASE_PATH = "D:/数字创意作品链上版权认证与交易平台/私钥/";
+    private static final String BASE_PATH = new File("src/main/resources/privateKey").getAbsolutePath() + "/";
+
 
     /**
      * 生成 Keystore 并更新用户的区块链地址。
@@ -53,19 +55,16 @@ public class KeystoreServiceImpl implements KeystoreService {
         CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
         String userAddress = keyPair.getAddress();
 
-        // 生成 Keystore 文件
-        String uuid = UUID.randomUUID().toString();
-        String keystorePath = BASE_PATH + "keystore-" + uuid + ".json";
-        KeystoreUtils.generateKeystore(keyPair, password, keystorePath);
+        // 生成 Keystore 文件内容（加密后的私钥）
+        String privateKey = KeystoreUtils.generateKeystore(keyPair, password);
 
         // 更新用户表
         user.setBlockchainAddress(userAddress);
         usersMapper.updateById(user);
 
-        return userAddress;
+        // 返回加密后的私钥内容
+        return privateKey;
     }
-
-
 
     /**
      * 验证用户上传的 Keystore 文件并返回私钥。
