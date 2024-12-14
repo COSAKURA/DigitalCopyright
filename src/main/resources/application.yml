@@ -1,8 +1,4 @@
 spring:
-  devtools:
-    restart:
-      enabled: false
-
 #数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

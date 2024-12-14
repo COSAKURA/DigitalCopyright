@@ -81,7 +81,6 @@ public class AuctionsController {
             @RequestParam("auctionId") BigInteger auctionId,
             @RequestParam("privateKey") String privateKey,
             @RequestParam("email") String email) {
-
         try {
             // 调用服务层方法结束拍卖
             auctionService.endAuction(email, auctionId, privateKey);

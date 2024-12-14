@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+
 
 @Slf4j
 @SpringBootTest
@@ -24,10 +24,7 @@ class DigitalCopyrightApplicationTests {
     @Autowired
     private Client client1;
 
-    @Autowired
-    private WorksMapper worksMapper;
 
-    @Test
     public void testGetWorkDetailsWithUserKey() throws Exception {
         // 用户提供的地址和私钥
         String userPrivateKey = KeystoreUtils.loadPrivateKeyFromKeystore("D:/数字创意作品链上版权认证与交易平台/私钥/keystore-8e6c9d20" +
