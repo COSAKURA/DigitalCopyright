@@ -42,6 +42,6 @@ public class WebConfig implements WebMvcConfigurer {
         // 配置静态资源路径映射
         // 例如：将 uploads 目录映射到 /uploads 路径
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/D:/数字创意作品链上版权认证与交易平台/DigitalCopyright/uploads/");
+                .addResourceLocations("file:/D:/艺溯之链/DigitalCopyright/uploads/");
     }
 }
