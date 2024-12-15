@@ -116,6 +116,12 @@ public class AuctionsController {
         }
     }
 
+
+    /**
+     * 根据拍卖 ID 获取拍卖信息
+     * @param workId 拍卖 ID
+     * @return  拍卖信息
+     */
     @GetMapping("/getAuctionById")
     public R getAuctionById(@RequestParam Integer workId) {
         try {

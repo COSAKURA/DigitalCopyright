@@ -9,7 +9,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.SecureRandom;
@@ -17,6 +16,9 @@ import java.security.Security;
 import java.util.Base64;
 
 
+/**
+ * @author Sakura
+ */
 @Slf4j
 public class KeystoreUtils {
 
@@ -24,7 +26,6 @@ public class KeystoreUtils {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private static final int AES_KEY_SIZE = 256; // AES 密钥大小（256 位）
     private static final int GCM_IV_LENGTH = 12; // GCM 初始向量长度（12 字节）
 
     /**

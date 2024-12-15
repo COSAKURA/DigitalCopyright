@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 public class SecurityUtils {
     /**
      * 生成BCryptPasswordEncoder密码
-     * @param password 密码
-     * @return 加密字符串
      */
     public static BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     public static String encodePassword(String password)

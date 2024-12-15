@@ -47,6 +47,11 @@ public class RegisterController {
         this.mailService = mailService;
     }
 
+    /**
+     * 发送邮箱验证码
+     * @param request 包含邮箱地址
+     * @return 返回验证码发送结果
+     */
     @PostMapping("/emailCode")
     public R emailCode(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -98,7 +103,11 @@ public class RegisterController {
     }
 
 
-    // 注册账号
+    /**
+     * 注册
+     * @param register 包含邮箱、密码、验证码
+     * @return 返回注册结果
+     */
     @PostMapping("/register")
     public R register(@RequestBody RegisterDTO register) {
 

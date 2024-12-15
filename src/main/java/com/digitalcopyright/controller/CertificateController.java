@@ -28,6 +28,11 @@ public class CertificateController {
         this.certificateService = certificateService;
     }
 
+    /**
+     * 下载证书
+     * @param workId 作品id
+     * @return ResponseEntity<byte[]>
+     */
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadCertificate(@RequestParam BigInteger workId) {
         try {

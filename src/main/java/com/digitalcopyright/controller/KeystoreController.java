@@ -35,6 +35,13 @@ public class KeystoreController {
     @Resource
     private UsersMapper usersMapper;
 
+
+    /**
+     * 生成密钥对并返回加密后的私钥
+     * @param email 用户邮箱
+     * @param password 用户密码
+     * @return 加密后的私钥
+     */
     @GetMapping("/generateKeystore")
     public ResponseEntity<byte[]> generateKeystore(@RequestParam String email, @RequestParam String password) {
         try {

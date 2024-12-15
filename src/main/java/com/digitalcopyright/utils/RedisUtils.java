@@ -22,7 +22,6 @@ public class RedisUtils {
      *  指定缓存失效时间
      * @param key 键
      * @param time 时间(秒)
-     * @return
      */
     public boolean expire(String key, long time) {
         if (time > 0) {
