@@ -4,9 +4,7 @@ import com.digitalcopyright.service.BlockchainService;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.client.protocol.model.JsonTransactionResponse;
 
-import org.fisco.bcos.sdk.client.protocol.response.BcosBlock;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransaction;
-import org.fisco.bcos.sdk.client.protocol.response.BcosTransactionReceipt;
+import org.fisco.bcos.sdk.client.protocol.response.*;
 
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,35 +24,71 @@ public class BlockchainServiceImpl implements BlockchainService {
     private Client client;
 
     /**
-     * 获取链上所有区块的哈希
+     * 获取链上所有区块的哈希和统计信息
      *
-     * @return 所有区块哈希的列表
+     * @return 包括区块哈希列表、节点个数、已部署合约数、区块数量和交易数量
      */
     @Override
-    public List<Map<String, String>> getAllBlockDetails() {
-        BigInteger latestBlockNumber = client.getBlockNumber().getBlockNumber();
+    public Map<String, Object> getAllBlockDetails() {
+        Map<String, Object> response = new HashMap<>();
         List<Map<String, String>> blockDetailsList = new ArrayList<>();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            // 获取最新区块号
+            BigInteger latestBlockNumber = client.getBlockNumber().getBlockNumber();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        for (BigInteger i = BigInteger.ZERO; i.compareTo(latestBlockNumber) <= 0; i = i.add(BigInteger.ONE)) {
-            BcosBlock block = client.getBlockByNumber(i, false); // 只获取区块头
-            if (block != null && block.getResult() != null) {
-                Map<String, String> blockDetail = new HashMap<>();
-                blockDetail.put("blockHash", block.getResult().getHash());
-                blockDetail.put("blockNumber", i.toString());
+            // 遍历所有区块，获取区块哈希和时间戳
+            for (BigInteger i = BigInteger.ZERO; i.compareTo(latestBlockNumber) <= 0; i = i.add(BigInteger.ONE)) {
+                BcosBlock block = client.getBlockByNumber(i, false); // 获取区块头信息
+                if (block != null && block.getResult() != null) {
+                    Map<String, String> blockDetail = new HashMap<>();
+                    blockDetail.put("blockHash", block.getResult().getHash());
+                    blockDetail.put("blockNumber", i.toString());
 
-                // 获取并格式化时间戳
-                String timestampHex = block.getResult().getTimestamp();
-                long timestampMillis = new BigInteger(timestampHex.substring(2), 16).longValue();
-                blockDetail.put("timestamp", sdf.format(new java.util.Date(timestampMillis)));
+                    // 格式化时间戳
+                    String timestampHex = block.getResult().getTimestamp();
+                    long timestampMillis = new BigInteger(timestampHex.substring(2), 16).longValue();
+                    blockDetail.put("timestamp", sdf.format(new java.util.Date(timestampMillis)));
 
-                blockDetailsList.add(blockDetail);
+                    blockDetailsList.add(blockDetail);
+                }
             }
+
+            // 统计信息
+            Map<String, Object> statistics = new HashMap<>();
+
+            // 获取节点数量
+            try {
+                List<String> peers = client.getGroupPeers().getResult();
+                statistics.put("nodeList" ,peers);
+            } catch (Exception e) {
+                statistics.put("nodeCount", "Unable to fetch");
+            }
+
+            // 区块数量
+            statistics.put("blockCount", latestBlockNumber.longValue());
+
+            // 交易数量
+            TotalTransactionCount.TransactionCountInfo transactionCount = client.getTotalTransactionCount().getTotalTransactionCount();
+            // 将 txSum 和 failedTxSum 转换为十进制
+            BigInteger txSumDecimal = new BigInteger(transactionCount.getTxSum().substring(2), 16);
+            BigInteger failedTxSumDecimal = new BigInteger(transactionCount.getFailedTxSum().substring(2), 16);
+
+            statistics.put("txSum", txSumDecimal);
+            statistics.put("failedTxSum", failedTxSumDecimal);
+
+            // 组装结果
+            response.put("blockDetails", blockDetailsList);
+            response.put("statistics", statistics);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching blockchain details: " + e.getMessage());
         }
 
-        return blockDetailsList;
+        return response;
     }
+
 
 
     /**
@@ -162,7 +196,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
         return transactionDetails;
     }
-
 
 
 }

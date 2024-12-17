@@ -10,7 +10,7 @@ import java.util.Map;
  */
 @Service
 public interface BlockchainService {
-    List<Map<String, String>> getAllBlockDetails();
+    Map<String, Object> getAllBlockDetails();
 
     List<Map<String, String>> getAllTransactionDetails();
 

@@ -33,21 +33,27 @@ public class BlockchainController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         try {
-            List<Map<String, String>> blockDetails = blockchainService.getAllBlockDetails();
+            Map<String, Object> blockDetails = blockchainService.getAllBlockDetails();
+
+            // 从 blockDetails 中提取区块列表
+            List<Map<String, String>> blockDetailsList = (List<Map<String, String>>) blockDetails.get("blockDetails");
 
             // 实现分页逻辑
-            int total = blockDetails.size();
+            int total = blockDetailsList.size();
             int start = Math.min(page * size, total);
             int end = Math.min(start + size, total);
 
-            List<Map<String, String>> paginatedBlockDetails = blockDetails.subList(start, end);
+            List<Map<String, String>> paginatedBlockDetails = blockDetailsList.subList(start, end);
 
-            // 返回分页数据
+            // 构建分页响应
             Map<String, Object> response = new HashMap<>();
             response.put("total", total);
             response.put("page", page);
             response.put("size", size);
             response.put("data", paginatedBlockDetails);
+
+            // 添加统计信息
+            response.put("count", blockDetails.get("statistics"));
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -55,6 +61,7 @@ public class BlockchainController {
                     .body(Map.of("error", e.getMessage()));
         }
     }
+
 
 
     /**
@@ -65,7 +72,7 @@ public class BlockchainController {
     @GetMapping("/allTransactionHashes")
     public ResponseEntity<Map<String, Object>> getAllTransactionDetails(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "5") int size) {
         try {
             List<Map<String, String>> transactionDetails = blockchainService.getAllTransactionDetails();
 
@@ -104,4 +111,5 @@ public class BlockchainController {
         }
         return ResponseEntity.ok(transactionDetails);
     }
+
 }
