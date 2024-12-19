@@ -291,16 +291,32 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 创建一个List来存放最终的返回结果
         List<Map<String, Object>> resultList = new ArrayList<>();
 
-        // 为每个作品记录填充对应的作品标题、描述以及区块哈希信息
+        // 遍历作品列表，为每个作品填充信息
         for (WorksDO work : worksList) {
             Map<String, Object> auctionMap = new HashMap<>();
 
-            // 填充作品的标题、描述和区块哈希到返回结果Map中
-            auctionMap.put("workId", work.getWorkId());  // 区块哈希
-            auctionMap.put("title", work.getTitle());  // 作品标题
-            auctionMap.put("description", work.getDescription());  // 作品描述
+            // 查询起始价格：根据workId从 auction 表获取
+            QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
+            auctionWrapper.eq("work_id", work.getWorkId());
+            AuctionsDO auction = auctionsMapper.selectOne(auctionWrapper);
+
+            // 查询用户信息：根据用户区块链地址或ID获取用户名
+            QueryWrapper<UsersDO> userWrapper = new QueryWrapper<>();
+            userWrapper.eq("id", work.getUserId()); // 假设 works 表中有 user_id 字段
+            UsersDO user = usersMapper.selectOne(userWrapper);
+
+            // 填充作品的标题、描述和其他信息到返回结果Map中
+            auctionMap.put("workId", work.getWorkId());       // 作品ID
+            auctionMap.put("title", work.getTitle());         // 作品标题
             auctionMap.put("blockHash", work.getBlockchainHash());  // 区块哈希
-            auctionMap.put("imagePath", work.getImgUrl());  // 区块哈希
+            auctionMap.put("imagePath", work.getImgUrl());    // 作品图片路径
+            auctionMap.put("category", work.getCategory());   // 作品类别
+
+            // 添加起始价格，如果没有对应的拍卖记录，则设为默认值
+            auctionMap.put("startingPrice", (auction != null) ? auction.getStartPrice() : "未设置");
+
+            // 添加用户名，如果没有找到用户，则设为"未知用户"
+            auctionMap.put("username", (user != null) ? user.getUsername() : "未知用户");
 
             // 将当前作品信息Map添加到返回结果列表中
             resultList.add(auctionMap);
@@ -309,6 +325,7 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 返回封装好的结果
         return resultList;
     }
+
 
     @Override
     public Map<String, Object> getAuctionById(Integer workId) {

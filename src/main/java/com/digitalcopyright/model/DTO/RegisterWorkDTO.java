@@ -18,6 +18,9 @@ public class RegisterWorkDTO {
     private String title;
     private String description;
 
+    @NotNull(message = "作品类型不能为空")
+    private  String category;
+
     @NotNull(message = "图片文件不能为空")
     private MultipartFile img; // 图片文件
 

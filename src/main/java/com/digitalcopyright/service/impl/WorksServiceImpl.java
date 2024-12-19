@@ -55,7 +55,8 @@ public class WorksServiceImpl implements WorksService {
     private  String adminPrivate;
 
     @Override
-    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email) {
+    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email ,
+                             String category) {
         // 根据邮箱查找用户
         UsersDO user = fetchUserByEmail(email);
 
@@ -89,6 +90,7 @@ public class WorksServiceImpl implements WorksService {
             RegisterWorkDTO registerWorkDTO = new RegisterWorkDTO();
             registerWorkDTO.setTitle(title);
             registerWorkDTO.setDescription(description);
+            registerWorkDTO.setCategory(category);
 
             // 保存作品信息到数据库
             saveWorkToDatabase(registerWorkDTO, user, filePath, hash, workIdOnChain, receipt.getTransactionHash());
@@ -203,6 +205,7 @@ public class WorksServiceImpl implements WorksService {
         work.setHash(hash);
         work.setWorkId(workIdOnChain.intValue());
         work.setBlockchainHash(hash);
+        work.setCategory(dto.getCategory());
         work.setTransactionHash(transactionHash);
         work.setCreatedAt(LocalDateTime.now());
         worksMapper.insert(work);
@@ -255,8 +258,16 @@ public class WorksServiceImpl implements WorksService {
                 throw new IllegalArgumentException("作品所属用户不存在，地址: " + userAddress);
             }
 
+            // 查询作品类型（category）
+            QueryWrapper<WorksDO> workQueryWrapper = new QueryWrapper<>();
+            workQueryWrapper.eq("work_id", workId);
+            WorksDO workDO = worksMapper.selectOne(workQueryWrapper);
+            if (workDO == null) {
+                throw new IllegalArgumentException("作品不存在于数据库，ID: " + workId);
+            }
+
             // 封装作品详情
-            return buildWorkDetailsVO(details);
+            return buildWorkDetailsVO(details , workDO.getCategory());
 
         } catch (IllegalArgumentException e) {
             log.error("查询作品详情参数异常: {}", e.getMessage());
@@ -271,8 +282,7 @@ public class WorksServiceImpl implements WorksService {
      * 构建 WorkDetailsVO 对象
      */
     private WorkDetailsVO buildWorkDetailsVO(
-            Tuple10<BigInteger, String, String, String, String, String, BigInteger, String, BigInteger, Boolean> details) {
-
+            Tuple10<BigInteger, String, String, String, String, String, BigInteger, String, BigInteger, Boolean> details , String category) {
         WorkDetailsVO workDetailsVO = new WorkDetailsVO();
         workDetailsVO.setWorkId(details.getValue1().intValue());
         workDetailsVO.setTitle(details.getValue2());
@@ -284,6 +294,7 @@ public class WorksServiceImpl implements WorksService {
         workDetailsVO.setBlockchainHash(details.getValue8());
         workDetailsVO.setCreatedAt(LocalDateTime.ofEpochSecond(details.getValue9().longValue(), 0, ZoneOffset.UTC));
         workDetailsVO.setIsOnAuction(details.getValue10());
+        workDetailsVO.setCategory(category);  // 设置作品类型
 
         log.info("封装作品详情完成: {}", workDetailsVO);
         return workDetailsVO;

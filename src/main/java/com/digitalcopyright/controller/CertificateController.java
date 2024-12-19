@@ -1,6 +1,7 @@
 package com.digitalcopyright.controller;
 
 import com.digitalcopyright.service.CertificateService;
+import com.digitalcopyright.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 证书 Controller
@@ -36,7 +39,7 @@ public class CertificateController {
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadCertificate(@RequestParam BigInteger workId) {
         try {
-            byte[] pdfBytes = certificateService.downloadCertificate(workId);
+            byte[] pdfBytes = certificateService.downloadCertificate2(workId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);
@@ -50,4 +53,6 @@ public class CertificateController {
             return ResponseEntity.internalServerError().build();
         }
     }
+
+
 }

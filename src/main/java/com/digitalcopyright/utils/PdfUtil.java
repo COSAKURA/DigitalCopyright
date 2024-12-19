@@ -24,7 +24,7 @@ import java.io.IOException;
 public class PdfUtil {
 
     public static byte[] generatePdf(String username, String workId, String title, String description,
-                                     String userAddress, String hash, String digitalCopyrightId,
+                                     String userAddress,  String digitalCopyrightId,
                                      String reviewersAddress, String createdAt, String qrContent)
             throws IOException, WriterException {
 
@@ -47,14 +47,13 @@ public class PdfUtil {
         document.add(titleParagraph);
 
         // 添加用户信息
-        document.add(new Paragraph("用户名: " + username).setFont(customFont).setFontSize(12).setMarginBottom(10));
         document.add(new Paragraph("作品 ID: " + workId).setFont(customFont).setFontSize(12).setMarginBottom(20));
 
         // 添加作品信息
         document.add(new Paragraph("标题: " + title).setFont(customFont).setFontSize(12).setMarginBottom(10));
         document.add(new Paragraph("描述: " + description).setFont(customFont).setFontSize(12).setMarginBottom(10));
-        document.add(new Paragraph("拥有者: " + userAddress).setFont(customFont).setFontSize(12).setMarginBottom(20));
-        document.add(new Paragraph("作品哈希: " + hash).setFont(customFont).setFontSize(12).setMarginBottom(10));
+        document.add(new Paragraph("拥有者: " + username).setFont(customFont).setFontSize(12).setMarginBottom(10));
+        document.add(new Paragraph("账户: " + userAddress).setFont(customFont).setFontSize(12).setMarginBottom(20));
         document.add(new Paragraph("版权编号: " + digitalCopyrightId).setFont(customFont).setFontSize(12).setMarginBottom(10));
         document.add(new Paragraph("审核地址: " + reviewersAddress).setFont(customFont).setFontSize(12).setMarginBottom(20));
         document.add(new Paragraph("创建时间: " + createdAt).setFont(customFont).setFontSize(12).setMarginBottom(10));

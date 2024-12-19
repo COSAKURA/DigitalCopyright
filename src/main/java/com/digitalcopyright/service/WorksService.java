@@ -17,7 +17,7 @@ public interface WorksService {
      * 注册作品，包括文件保存、用户绑定、作品入库
      *
      */
-    void registerWork(MultipartFile file, String title, String description, String privateKey, String email);
+    void registerWork(MultipartFile file, String title, String description, String privateKey, String email , String category);
 
 
     /**

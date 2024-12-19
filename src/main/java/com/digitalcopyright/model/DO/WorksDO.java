@@ -58,6 +58,8 @@ public class WorksDO implements Serializable {
 
     private String transactionHash;
 
+    private String category;  // 作品类型
+
     private Boolean isOnAuction; // 是否在拍卖
 
     private LocalDateTime createdAt;

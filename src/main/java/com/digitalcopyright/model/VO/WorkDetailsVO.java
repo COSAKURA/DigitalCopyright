@@ -15,4 +15,5 @@ public class WorkDetailsVO {
     private String blockchainHash; // 区块链哈希
     private LocalDateTime createdAt; // 创建时间
     private Boolean isOnAuction; // 是否在拍卖中
+    private String category; // 类型
 }
