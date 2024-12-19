@@ -39,7 +39,7 @@ public class CertificateController {
     @GetMapping("/download")
     public ResponseEntity<byte[]> downloadCertificate(@RequestParam BigInteger workId) {
         try {
-            byte[] pdfBytes = certificateService.downloadCertificate2(workId);
+            byte[] pdfBytes = certificateService.downloadCertificate(workId);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

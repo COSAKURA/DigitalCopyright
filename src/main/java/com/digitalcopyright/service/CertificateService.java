@@ -15,6 +15,4 @@ public interface CertificateService {
 
     byte[] downloadCertificate(BigInteger workId);
 
-
-    byte[] downloadCertificate2(BigInteger workId);
 }
