@@ -44,7 +44,7 @@ public class PdfUtil {
         Image templateImage = new Image(templateImageData);
 
         // 设置背景图片全屏显示
-        templateImage.setFixedPosition(0, 0); // 图片固定在页面左下角
+        templateImage.setFixedPosition(17, 0); // 图片固定在页面左下角
         templateImage.scaleToFit(pageSize.getWidth(), pageSize.getHeight()); // 缩放图片填满整个页面
 
         // 添加模板图片作为背景
@@ -58,39 +58,39 @@ public class PdfUtil {
         document.add(new Paragraph(copyrightNumber)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(220, 399, 400));
+                .setFixedPosition(230, 399, 400));
         document.add(new Paragraph( workCategory)  // 作品编号
                 .setFont(customFont)
                 .setFontSize(18)
-                .setFixedPosition(500, 398, 400));
+                .setFixedPosition(504, 398, 400));
         document.add(new Paragraph( workTitle)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(250, 350, 400));
+                .setFixedPosition(270, 350, 400));
         document.add(new Paragraph( createdAt)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(500, 350, 400));
+                .setFixedPosition(510, 350, 400));
         document.add(new Paragraph(registrationId)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(220, 315, 400));
+                .setFixedPosition(230, 315, 400));
         document.add(new Paragraph( registrationId)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(500, 315, 400));
+                .setFixedPosition(510, 315, 400));
         document.add(new Paragraph(registrationId)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(300, 215, 400));
+                .setFixedPosition(304, 215, 400));
         document.add(new Paragraph( ownerAddress)
                 .setFont(customFont)
-                .setFontSize(8)
-                .setFixedPosition(450, 219, 400));
+                .setFontSize(8.5F)
+                .setFixedPosition(465, 219, 400));
         document.add(new Paragraph( reviewAddress)
                 .setFont(customFont)
                 .setFontSize(17)
-                .setFixedPosition(208, 112, 400));
+                .setFixedPosition(220, 112, 400));
 
         // 添加二维码
         Image qrCodeImage = new Image(ImageDataFactory.create(generateQRCode(qrContent)));

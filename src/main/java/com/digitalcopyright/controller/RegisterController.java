@@ -81,6 +81,7 @@ public class RegisterController {
             emailCode.setTimestamp(currentTime);
             emailCodeStore.put(email, emailCode);
 
+
             // 发送验证码邮件
             mailService.sendCodeMailMessage(email, code);
         } else {
@@ -110,6 +111,12 @@ public class RegisterController {
      */
     @PostMapping("/register")
     public R register(@RequestBody RegisterDTO register) {
+
+        log.error("验证码：{}",register.getEmailCode());
+        log.error("验证码：{}",register.getEmail());
+        log.error("验证码：{}",register.getType());
+        log.error("验证码：{}",register.getPassword());
+
 
         String email = register.getEmail().trim();
         String emailCode = register.getEmailCode().trim();
