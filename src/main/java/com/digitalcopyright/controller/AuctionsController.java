@@ -123,10 +123,11 @@ public class AuctionsController {
      * @return  拍卖信息
      */
     @GetMapping("/getAuctionById")
-    public R getAuctionById(@RequestParam Integer workId) {
+    public R getAuctionById(@RequestParam Integer workId,
+                             @RequestParam String currentUserEmail){
         try {
             // 调用 Service 层方法根据拍卖 ID 获取数据
-            Map<String, Object> auction = auctionService.getAuctionById(workId);
+            Map<String, Object> auction = auctionService.getAuctionById(workId ,currentUserEmail);
 
             // 如果找不到对应的拍卖数据，返回提示信息
             if (auction == null) {

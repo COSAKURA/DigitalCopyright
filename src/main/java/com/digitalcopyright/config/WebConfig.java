@@ -27,7 +27,8 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 匹配所有接口
                 .allowedOrigins(
-                        "http://127.0.0.1:8089",         // 本地开发环境
+                        "http://localhost:8089",         // 本地开发环境
+                        "http://172.46.225.0:8089",
                         "http://172.46.225.1:8089",      // 部署的前端地址（使用域名）
                         "http://172.46.225.2:8089",
                         "http://172.46.225.3:8089",

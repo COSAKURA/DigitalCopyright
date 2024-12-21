@@ -55,8 +55,7 @@ public class WorksServiceImpl implements WorksService {
     private  String adminPrivate;
 
     @Override
-    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email ,
-                             String category) {
+    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email ) {
         // 根据邮箱查找用户
         UsersDO user = fetchUserByEmail(email);
 
@@ -90,7 +89,6 @@ public class WorksServiceImpl implements WorksService {
             RegisterWorkDTO registerWorkDTO = new RegisterWorkDTO();
             registerWorkDTO.setTitle(title);
             registerWorkDTO.setDescription(description);
-            registerWorkDTO.setCategory(category);
 
             // 保存作品信息到数据库
             saveWorkToDatabase(registerWorkDTO, user, filePath, hash, workIdOnChain, receipt.getTransactionHash());
@@ -205,7 +203,7 @@ public class WorksServiceImpl implements WorksService {
         work.setHash(hash);
         work.setWorkId(workIdOnChain.intValue());
         work.setBlockchainHash(hash);
-        work.setCategory(dto.getCategory());
+        work.setCategory("艺术类");
         work.setTransactionHash(transactionHash);
         work.setCreatedAt(LocalDateTime.now());
         worksMapper.insert(work);

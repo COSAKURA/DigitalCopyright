@@ -35,13 +35,12 @@ public class WorksController {
             @RequestParam("title") String title,
             @RequestParam("description") String description,
             @RequestParam("privateKey") String privateKey,
-            @RequestParam("email") String email,
-            @RequestParam("category") String category
+            @RequestParam("email") String email
     )
     {
         try {
             // 调用服务层逻辑
-            worksService.registerWork(file, title, description, privateKey, email  , category) ;
+            worksService.registerWork(file, title, description, privateKey, email) ;
             return R.ok("作品上传成功");
         } catch (IllegalArgumentException e) {
             return R.error(400, e.getMessage());

@@ -81,8 +81,8 @@ public class PdfUtil {
                 .setFixedPosition(510, 315, 400));
         document.add(new Paragraph(registrationId)
                 .setFont(customFont)
-                .setFontSize(17)
-                .setFixedPosition(304, 215, 400));
+                .setFontSize(12)
+                .setFixedPosition(280, 215, 400));
         document.add(new Paragraph( ownerAddress)
                 .setFont(customFont)
                 .setFontSize(8.5F)

@@ -26,5 +26,5 @@ public interface AuctionsService {
 
     List<Map<String, Object>> getAllAuctions();
 
-    Map<String, Object> getAuctionById(Integer workId);
+    Map<String, Object> getAuctionById(Integer workId ,String currentUserEmail);
 }
