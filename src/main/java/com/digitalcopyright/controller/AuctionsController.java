@@ -54,7 +54,14 @@ public class AuctionsController {
         }
     }
 
-    // 用户竞价接口
+    /**
+     * 结束拍卖接口
+     * @param email 用户邮箱
+     * @param auctionId 拍卖ID
+     * @param bidAmount 出价金额
+     * @param privateKey 用户私钥
+     * @return 响应结果
+     */
     @PostMapping("/placeBid")
     public R placeBid(
             @RequestParam String email,
