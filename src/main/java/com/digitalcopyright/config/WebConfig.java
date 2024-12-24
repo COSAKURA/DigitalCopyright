@@ -25,24 +25,30 @@ public class WebConfig implements WebMvcConfigurer {
      */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // 匹配所有接口
+        // 匹配所有接口
+        registry.addMapping("/**")
                 .allowedOrigins(
-                        "http://localhost:8089",         // 本地开发环境
+                        // 本地开发环境
+                        "http://localhost:8089",
                         "http://172.46.225.0:8089",
-                        "http://172.46.225.1:8089",      // 部署的前端地址（使用域名）
+                        // 部署的前端地址（使用域名）
+                        "http://172.46.225.1:8089",
                         "http://172.46.225.2:8089",
                         "http://172.46.225.3:8089",
                         "http://172.46.225.4:8089"
                 )
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 允许的 HTTP 方法
-                .allowedHeaders("*")  // 允许所有请求头，提升兼容性
-                .allowCredentials(true) // 允许发送 Cookie 或身份凭证
-                .maxAge(3600); // 预检请求的缓存时间，单位秒
+                // 允许的 HTTP 方法
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                // 允许所有请求头，提升兼容性
+                .allowedHeaders("*")
+                // 允许发送 Cookie 或身份凭证
+                .allowCredentials(true)
+                // 预检请求的缓存时间，单位秒
+                .maxAge(3600);
     }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 配置静态资源路径映射
-        // 例如：将 uploads 目录映射到 /uploads 路径
+        // 配置静态资源路径映射,将 uploads 目录映射到 /uploads 路径
         registry.addResourceHandler("/uploads/**")
                 .addResourceLocations("file:/D:/艺溯之链/DigitalCopyright/uploads/");
     }

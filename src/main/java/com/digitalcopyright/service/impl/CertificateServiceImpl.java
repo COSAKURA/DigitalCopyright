@@ -77,14 +77,21 @@ public class CertificateServiceImpl implements CertificateService {
 
             // 将合约返回的详情直接写入 PDF
             return PdfUtil.generatePdfWithTemplate(
-                    user.getUsername(), // 用户名
-                    details.getValue1().toString(), // 创建时间
-                    details.getValue2(), // 标题
-                    String.valueOf(details.getValue8()), // 版权编号
-                    details.getValue6(), // 审核地址
-                    details.getValue9().toString(), // 作品 ID
+                    // 用户名
+                    user.getUsername(),
+                    // 创建时间
+                    details.getValue1().toString(),
+                    // 标题
+                    details.getValue2(),
+                    // 版权编号
+                    String.valueOf(details.getValue8()),
+                    // 审核地址
+                    details.getValue6(),
+                    // 作品 ID
+                    details.getValue9().toString(),
                     work.getCategory(),
-                    details.getValue4() // 二维码内容（可以替换为作品链接）
+                    // 二维码内容（可以替换为作品链接）
+                    details.getValue4()
             );
         } catch (Exception e) {
             throw new RuntimeException("获取作品信息或生成 PDF 失败: " + e.getMessage(), e);

@@ -41,9 +41,11 @@ public class IOUtil {
         // 使用当前线程的上下文类加载器加载资源
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         try (InputStream in = classLoader.getResourceAsStream(resource)) {
-            return readAsString(in); // 读取输入流内容为字符串
+            // 读取输入流内容为字符串
+            return readAsString(in);
         } catch (IOException ex) {
-            log.error("Error reading resource", ex); // 记录错误日志
+            // 记录错误日志
+            log.error("Error reading resource", ex);
             return null;
         }
     }
@@ -57,8 +59,10 @@ public class IOUtil {
      */
     public static String readAsString(InputStream inputStream) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        copy(inputStream, baos); // 将输入流内容拷贝到 ByteArrayOutputStream
-        return new String(baos.toByteArray()); // 转为字符串并返回
+        // 将输入流内容拷贝到 ByteArrayOutputStream
+        copy(inputStream, baos);
+        // 转为字符串并返回
+        return new String(baos.toByteArray());
     }
 
     /**
@@ -71,7 +75,8 @@ public class IOUtil {
     public static void writeString(File target, String template) throws IOException {
         ByteArrayInputStream baos = new ByteArrayInputStream(template.getBytes());
         try (FileOutputStream fos = new FileOutputStream(target, false)) {
-            copy(baos, fos); // 将字符串内容写入到文件
+            // 将字符串内容写入到文件
+            copy(baos, fos);
         }
     }
 
@@ -86,12 +91,15 @@ public class IOUtil {
         for (File f : srcDir.listFiles()) {
             File fileCopyTo = new File(destDir, f.getName());
             if (!f.isDirectory()) {
-                copyFile(f, fileCopyTo); // 如果是文件，直接拷贝
+                // 如果是文件，直接拷贝
+                copyFile(f, fileCopyTo);
             } else {
-                if (!fileCopyTo.mkdirs()) { // 如果是文件夹，创建目标文件夹
+                // 如果是文件夹，创建目标文件夹
+                if (!fileCopyTo.mkdirs()) {
                     throw new IOException("Dir " + fileCopyTo.getAbsolutePath() + " create failed");
                 }
-                copyFolder(f, fileCopyTo); // 递归拷贝子文件夹
+                // 递归拷贝子文件夹
+                copyFolder(f, fileCopyTo);
             }
         }
     }
@@ -106,7 +114,8 @@ public class IOUtil {
     public static void copyFile(File src, File tgt) throws IOException {
         try (FileInputStream fis = new FileInputStream(src);
              FileOutputStream fos = new FileOutputStream(tgt, false)) {
-            copy(fis, fos); // 调用通用的拷贝方法
+            // 调用通用的拷贝方法
+            copy(fis, fos);
         }
     }
 
@@ -122,10 +131,13 @@ public class IOUtil {
              BufferedOutputStream bos = new BufferedOutputStream(os)) {
             byte[] buf = new byte[BUF_SIZE];
             int n;
-            while ((n = bis.read(buf)) != -1) { // 持续读取数据直到结束
-                bos.write(buf, 0, n); // 写入数据
+            // 持续读取数据直到结束
+            while ((n = bis.read(buf)) != -1) {
+                // 写入数据
+                bos.write(buf, 0, n);
             }
-            bos.flush(); // 刷新缓冲区
+            // 刷新缓冲区
+            bos.flush();
         }
     }
 
@@ -135,7 +147,8 @@ public class IOUtil {
      * @param item 需要删除的文件或文件夹
      */
     public static void removeItem(File item) {
-        if (!item.isDirectory()) { // 如果是文件，直接删除
+        // 如果是文件，直接删除
+        if (!item.isDirectory()) {
             item.delete();
             return;
         }
@@ -144,6 +157,7 @@ public class IOUtil {
         for (File subItem : item.listFiles()) {
             removeItem(subItem);
         }
-        item.delete(); // 删除空文件夹
+        // 删除空文件夹
+        item.delete();
     }
 }

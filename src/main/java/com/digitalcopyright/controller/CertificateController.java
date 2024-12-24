@@ -1,7 +1,6 @@
 package com.digitalcopyright.controller;
 
 import com.digitalcopyright.service.CertificateService;
-import com.digitalcopyright.utils.R;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -12,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
+
 
 /**
  * 证书 Controller

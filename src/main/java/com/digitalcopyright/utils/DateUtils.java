@@ -16,7 +16,8 @@ public class DateUtils {
     private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final SimpleDateFormat DATETIME_WITH_MS_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    private static final int CURRENT_MONTH = Calendar.getInstance().get(Calendar.MONTH) + 1; // 当前月份
+    // 当前月份
+    private static final int CURRENT_MONTH = Calendar.getInstance().get(Calendar.MONTH) + 1;
 
     /**
      * 获得当前日期 yyyy-MM-dd HH:mm:ss

@@ -6,14 +6,13 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import org.web3j.abi.datatypes.Int;
+
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 
 /**
  * <p>
@@ -26,7 +25,8 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("auctions") // 指定表名为 auctions
+// 指定表名为 auctions
+@TableName("auctions")
 public class AuctionsDO implements Serializable {
 
     @Serial

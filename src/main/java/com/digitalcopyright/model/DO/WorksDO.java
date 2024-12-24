@@ -12,7 +12,7 @@ import lombok.experimental.Accessors;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
+
 
 /**
  * <p>
@@ -25,7 +25,8 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("works") // 指定表名为 works
+// 指定表名为 works
+@TableName("works")
 @AllArgsConstructor
 @NoArgsConstructor
 public class WorksDO implements Serializable {

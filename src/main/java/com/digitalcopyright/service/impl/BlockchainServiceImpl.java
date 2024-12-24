@@ -40,7 +40,8 @@ public class BlockchainServiceImpl implements BlockchainService {
 
             // 遍历所有区块，获取区块哈希和时间戳
             for (BigInteger i = BigInteger.ZERO; i.compareTo(latestBlockNumber) <= 0; i = i.add(BigInteger.ONE)) {
-                BcosBlock block = client.getBlockByNumber(i, false); // 获取区块头信息
+                // 获取区块头信息
+                BcosBlock block = client.getBlockByNumber(i, false);
                 if (block != null && block.getResult() != null) {
                     Map<String, String> blockDetail = new HashMap<>();
                     blockDetail.put("blockHash", block.getResult().getHash());
@@ -93,7 +94,6 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     /**
      * 获取链上所有区块的交易哈希
-     *
      * @return 所有交易哈希的列表
      */
     @Override
@@ -104,8 +104,10 @@ public class BlockchainServiceImpl implements BlockchainService {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         for (BigInteger i = BigInteger.ZERO; i.compareTo(latestBlockNumber) <= 0; i = i.add(BigInteger.ONE)) {
-            BigInteger blockNumber = i; // 将 i 赋值给一个新的变量
-            BcosBlock block = client.getBlockByNumber(blockNumber, true); // 获取完整区块，包括交易列表
+            // 将 i 赋值给一个新的变量
+            BigInteger blockNumber = i;
+            // 获取完整区块，包括交易列表
+            BcosBlock block = client.getBlockByNumber(blockNumber, true);
             if (block != null && block.getResult() != null) {
                 String timestampHex = block.getResult().getTimestamp();
                 long timestampMillis = new BigInteger(timestampHex.substring(2), 16).longValue();
@@ -121,7 +123,8 @@ public class BlockchainServiceImpl implements BlockchainService {
                         transactionDetail.put("from", transactionObject.getFrom());
                         transactionDetail.put("to", transactionObject.getTo());
                         transactionDetail.put("timestamp", formattedTimestamp);
-                        transactionDetail.put("blockNumber", blockNumber.toString()); // 使用新的变量
+                        // 使用新的变量
+                        transactionDetail.put("blockNumber", blockNumber.toString());
 
                         transactionDetailsList.add(transactionDetail);
                     } else {

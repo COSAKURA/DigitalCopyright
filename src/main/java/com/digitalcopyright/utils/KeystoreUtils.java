@@ -26,11 +26,11 @@ public class KeystoreUtils {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    private static final int GCM_IV_LENGTH = 12; // GCM 初始向量长度（12 字节）
+    // GCM 初始向量长度（12 字节）
+    private static final int GCM_IV_LENGTH = 12;
 
     /**
      * 生成 Keystore 文件，保存加密的私钥
-     *
      * @param keyPair     区块链密钥对
      * @param password    用于生成加密密钥的密码
      * @throws Exception 发生异常时抛出
@@ -58,10 +58,6 @@ public class KeystoreUtils {
         String encodedIV = Base64.getEncoder().encodeToString(iv);
         String encodedEncryptedData = Base64.getEncoder().encodeToString(encryptedData);
         String keystoreContent = encodedIV + ":" + encodedEncryptedData;
-        //
-        // try (FileOutputStream fos = new FileOutputStream(keystorePath)) {
-        //     fos.write(keystoreContent.getBytes(StandardCharsets.UTF_8));
-        // }
         return keystoreContent;
     }
 

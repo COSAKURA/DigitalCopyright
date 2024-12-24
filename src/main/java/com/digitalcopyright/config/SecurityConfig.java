@@ -24,15 +24,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()  // 禁用 CSRF 防护
+                // 禁用 CSRF 防护
+                .csrf().disable()
                 .authorizeRequests()
-                .requestMatchers("/**").permitAll()  // 放行接口
-                .anyRequest().authenticated()  // 其他请求需要认证
+                // 放行接口
+                .requestMatchers("/**").permitAll()
+                // 其他请求需要认证
+                .anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
-                .authenticationEntryPoint(unauthorizedHandler())  // 自定义未认证处理
+                // 自定义未认证处理
+                .authenticationEntryPoint(unauthorizedHandler())
                 .and()
-                .formLogin().disable();  // 禁用表单登录（取消默认重定向）
+                // 禁用表单登录（取消默认重定向）
+                .formLogin().disable();
 
         return http.build();
     }

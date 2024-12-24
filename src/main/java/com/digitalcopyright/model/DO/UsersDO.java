@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.BitSet;
+
 
 /**
  * <p>
@@ -22,7 +22,8 @@ import java.util.BitSet;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("users") // 将 "users" 替换为你的实际表名
+// 指定表名为 users
+@TableName("users")
 public class UsersDO implements Serializable {
 
     @Serial

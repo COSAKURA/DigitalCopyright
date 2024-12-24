@@ -112,14 +112,21 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 打印auction对象，确认数据是否正确
         AuctionsDO auction = new AuctionsDO();
         auction.setWorkId(workId);
-        auction.setSellerId(work.getUserId());  // 假设作品的用户ID就是拍卖者ID
+        // 假设作品的用户ID就是拍卖者ID
+        auction.setSellerId(work.getUserId());
         auction.setStartPrice(startPrice);
-        auction.setCurrentPrice(startPrice);  // 初始价格即当前价格
-        auction.setBuyerId(null);     // 尚未有出价者
-        auction.setEndTime(endTime);          // 拍卖结束时间
-        auction.setStatus(1);                 // 1 表示拍卖中
-        auction.setTransactionHash(transactionHash);  // 链上交易哈希
-        auction.setAuctionId(auctionCounter);    // 设置链上的拍卖ID
+        // 初始价格即当前价格
+        auction.setCurrentPrice(startPrice);
+        // 尚未有出价者
+        auction.setBuyerId(null);
+        // 拍卖结束时间
+        auction.setEndTime(endTime);
+        // 1 表示拍卖中
+        auction.setStatus(1);
+        // 链上交易哈希
+        auction.setTransactionHash(transactionHash);
+        // 设置链上的拍卖ID
+        auction.setAuctionId(auctionCounter);
 
         // 确认auction对象的值
         System.out.println("拍卖对象: " + auction);
@@ -191,7 +198,8 @@ public class AuctionsServiceImpl implements AuctionsService {
 
         // 7. 更新拍卖记录的当前出价和最高出价者
         auction.setCurrentPrice(bidAmount);
-        auction.setBuyerId(user.getId());  // 更新最高出价者
+        // 更新最高出价者
+        auction.setBuyerId(user.getId());
 
         // 8. 使用 MyBatis-Plus 的 updateById 方法更新拍卖信息
         if (auctionsMapper.updateById(auction) == 0) {
@@ -271,7 +279,8 @@ public class AuctionsServiceImpl implements AuctionsService {
             return null;
         }
 
-        String data = output.substring(10); // 去掉前缀 '0x08c379a0'
+        // 去掉前缀 '0x08c379a0'
+        String data = output.substring(10);
 
         // 解码：将 hex 转换为 UTF-8 字符串
         byte[] bytes = Numeric.hexStringToByteArray(data);
@@ -286,7 +295,8 @@ public class AuctionsServiceImpl implements AuctionsService {
     public List<Map<String, Object>> getAllAuctions() {
         // 查询拍卖表中所有进行中的拍卖 (status = 1)
         QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
-        auctionWrapper.eq("status", 1); // 只查询进行中的拍卖
+        // 只查询进行中的拍卖
+        auctionWrapper.eq("status", 1);
 
         List<AuctionsDO> auctionList = auctionsMapper.selectList(auctionWrapper);
 
@@ -304,18 +314,27 @@ public class AuctionsServiceImpl implements AuctionsService {
             UsersDO seller = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("id", auction.getSellerId()));
 
             // 填充拍卖和作品的详细信息
-            auctionMap.put("auctionId", auction.getAuctionId()); // 拍卖ID
-            auctionMap.put("workId", auction.getWorkId());       // 作品ID
-            auctionMap.put("startingPrice", auction.getStartPrice()); // 起始价格
-            auctionMap.put("currentPrice", auction.getCurrentPrice()); // 当前价格
-            auctionMap.put("endTime", auction.getEndTime());     // 拍卖结束时间
+                // 拍卖ID
+            auctionMap.put("auctionId", auction.getAuctionId());
+            // 作品ID
+            auctionMap.put("workId", auction.getWorkId());
+            // 起始价格
+            auctionMap.put("startingPrice", auction.getStartPrice());
+            // 当前价格
+            auctionMap.put("currentPrice", auction.getCurrentPrice());
+            // 拍卖结束时间
+            auctionMap.put("endTime", auction.getEndTime());
 
             // 填充作品信息
             if (work != null) {
-                auctionMap.put("title", work.getTitle());         // 作品标题
-                auctionMap.put("blockHash", work.getBlockchainHash()); // 区块哈希
-                auctionMap.put("imagePath", work.getImgUrl());    // 作品图片路径
-                auctionMap.put("category", work.getCategory());   // 作品类别
+                // 作品标题
+                auctionMap.put("title", work.getTitle());
+                // 区块哈希
+                auctionMap.put("blockHash", work.getBlockchainHash());
+                // 作品图片路径
+                auctionMap.put("imagePath", work.getImgUrl());
+                // 作品类别
+                auctionMap.put("category", work.getCategory());
             } else {
                 auctionMap.put("title", "未知作品");
                 auctionMap.put("blockHash", "未知");
@@ -343,7 +362,8 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 查询拍卖数据，增加 status = 1 的条件
         QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
         auctionWrapper.eq("work_id", workId);
-        auctionWrapper.eq("status", 1); // 只查询状态为 1 的拍卖数据
+        // 只查询状态为 1 的拍卖数据
+        auctionWrapper.eq("status", 1);
         AuctionsDO auction = auctionsMapper.selectOne(auctionWrapper);
 
         if (auction == null) {
@@ -352,7 +372,8 @@ public class AuctionsServiceImpl implements AuctionsService {
 
         // 查询作品数据
         QueryWrapper<WorksDO> workWrapper = new QueryWrapper<>();
-        workWrapper.eq("work_id", workId); // 使用正确的 workWrapper 查询条件
+        // 使用正确的 workWrapper 查询条件
+        workWrapper.eq("work_id", workId);
         WorksDO work = worksMapper.selectOne(workWrapper);
 
         if (work == null) {
@@ -361,7 +382,8 @@ public class AuctionsServiceImpl implements AuctionsService {
 
         // 查询用户数据（假设作品表或拍卖表中包含 user_id 字段）
         QueryWrapper<UsersDO> userWrapper = new QueryWrapper<>();
-        userWrapper.eq("id", work.getUserId()); // 通过作品的 user_id 查询用户信息
+        // 通过作品的 user_id 查询用户信息
+        userWrapper.eq("id", work.getUserId());
         UsersDO user = usersMapper.selectOne(userWrapper);
 
         if (user == null) {
@@ -380,8 +402,10 @@ public class AuctionsServiceImpl implements AuctionsService {
         result.put("startPrice", auction.getStartPrice());
         result.put("currentPrice", auction.getCurrentPrice());
         result.put("endTime", auction.getEndTime());
-        result.put("username", user.getUsername()); // 添加用户名到结果中
-        result.put("isOwner", isOwner); // 添加 isOwner 字段
+        // 添加用户名到结果中
+        result.put("username", user.getUsername());
+        // 添加 isOwner 字段
+        result.put("isOwner", isOwner);
 
         return result;
     }

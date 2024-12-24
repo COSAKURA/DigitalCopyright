@@ -20,6 +20,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * @author Sakura
+ */
 public class PdfUtil {
 
     public static byte[] generatePdfWithTemplate(String registrationId, String copyrightNumber, String workTitle,
@@ -32,20 +35,24 @@ public class PdfUtil {
         PdfWriter writer = new PdfWriter(outputStream);
 
         // 设置页面为横向 (Landscape)
-        PageSize pageSize = PageSize.A4.rotate(); // A4 横向
+            // A4 横向
+        PageSize pageSize = PageSize.A4.rotate();
         PdfDocument pdf = new PdfDocument(writer);
         pdf.setDefaultPageSize(pageSize);
 
         Document document = new Document(pdf);
 
         // 加载证书模板图片
-        String imagePath = "src/main/resources/templates/log.png"; // 替换为您的模板路径
+            // 替换为您的模板路径
+        String imagePath = "src/main/resources/templates/log.png";
         ImageData templateImageData = ImageDataFactory.create(imagePath);
         Image templateImage = new Image(templateImageData);
 
         // 设置背景图片全屏显示
-        templateImage.setFixedPosition(17, 0); // 图片固定在页面左下角
-        templateImage.scaleToFit(pageSize.getWidth(), pageSize.getHeight()); // 缩放图片填满整个页面
+            // 图片固定在页面左下角
+        templateImage.setFixedPosition(17, 0);
+        // 缩放图片填满整个页面
+        templateImage.scaleToFit(pageSize.getWidth(), pageSize.getHeight());
 
         // 添加模板图片作为背景
         document.add(templateImage);
@@ -94,8 +101,10 @@ public class PdfUtil {
 
         // 添加二维码
         Image qrCodeImage = new Image(ImageDataFactory.create(generateQRCode(qrContent)));
-        qrCodeImage.setFixedPosition(600, 80); // 设置二维码位置（横向页面的右下角）
-        qrCodeImage.scaleToFit(100, 100); // 设置二维码大小
+        // 设置二维码位置（横向页面的右下角）
+        qrCodeImage.setFixedPosition(600, 80);
+        // 设置二维码大小
+        qrCodeImage.scaleToFit(100, 100);
         document.add(qrCodeImage);
 
         // 关闭文档

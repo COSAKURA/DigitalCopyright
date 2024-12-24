@@ -1,6 +1,7 @@
 package com.digitalcopyright.controller;
 
 import com.digitalcopyright.service.BlockchainService;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ import java.util.Map;
 @RequestMapping("/blockchain")
 public class BlockchainController {
 
-    @Autowired
+    @Resource
     private BlockchainService blockchainService;
 
     /**

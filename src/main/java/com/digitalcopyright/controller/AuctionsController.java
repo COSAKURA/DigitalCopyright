@@ -55,7 +55,7 @@ public class AuctionsController {
     }
 
     /**
-     * 结束拍卖接口
+     * 竞拍接口
      * @param email 用户邮箱
      * @param auctionId 拍卖ID
      * @param bidAmount 出价金额
