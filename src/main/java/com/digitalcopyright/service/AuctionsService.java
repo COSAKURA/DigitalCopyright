@@ -1,6 +1,7 @@
 package com.digitalcopyright.service;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
@@ -20,7 +21,7 @@ public interface AuctionsService {
 
     void startAuction(String email, BigInteger workId, BigInteger startPrice, long duration,String privateKey);
 
-    void placeBid(String email, BigInteger auctionId, BigInteger bidAmount, String privateKey);
+    void placeBid(String email, BigInteger auctionId, BigInteger bidAmount, String privateKey) throws JsonProcessingException;
 
     void endAuction(String email, BigInteger auctionId, String privateKey);
 

@@ -1,6 +1,7 @@
 package com.digitalcopyright.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.digitalcopyright.common.AuctionWebSocketHandler;
 import com.digitalcopyright.fisco.DigitalCopyright;
 import com.digitalcopyright.mapper.AuctionsMapper;
 import com.digitalcopyright.mapper.UsersMapper;
@@ -9,6 +10,8 @@ import com.digitalcopyright.model.DO.AuctionsDO;
 import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.model.DO.WorksDO;
 import com.digitalcopyright.service.AuctionsService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -147,7 +150,7 @@ public class AuctionsServiceImpl implements AuctionsService {
 
     @Override
     @Transactional
-    public void placeBid(String email, BigInteger auctionId, BigInteger bidAmount, String privateKey) {
+    public void placeBid(String email, BigInteger auctionId, BigInteger bidAmount, String privateKey) throws JsonProcessingException {
         // 1. 获取用户信息
         UsersDO user = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("email", email));
         if (user == null || !"正常".equals(user.getStatus())) {
@@ -205,6 +208,18 @@ public class AuctionsServiceImpl implements AuctionsService {
         if (auctionsMapper.updateById(auction) == 0) {
             throw new RuntimeException("更新拍卖记录失败");
         }
+
+        // 出价成功后，推送更新给所有客户端
+        Map<String, Object> auctionUpdate = new HashMap<>();
+        auctionUpdate.put("auctionId", auctionId);
+        auctionUpdate.put("currentPrice", bidAmount);
+        auctionUpdate.put("buyerId", user.getId());
+
+        // 将更新的数据转换为 JSON 格式
+        String message = new ObjectMapper().writeValueAsString(auctionUpdate);
+
+        // 推送消息到 WebSocket
+        AuctionWebSocketHandler.broadcast(message);
     }
 
     @Override
