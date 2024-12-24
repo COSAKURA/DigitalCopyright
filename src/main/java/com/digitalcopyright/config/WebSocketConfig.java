@@ -16,6 +16,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(new AuctionWebSocketHandler(), "/ws/auction")
-                .setAllowedOrigins("*"); // 允许跨域
+                // 允许跨域
+                .setAllowedOrigins("*");
     }
 }
