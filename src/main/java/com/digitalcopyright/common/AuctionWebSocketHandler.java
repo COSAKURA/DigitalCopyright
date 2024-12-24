@@ -17,7 +17,8 @@ public class AuctionWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        sessions.add(session); // 添加会话
+        // 添加会话
+        sessions.add(session);
     }
 
     @Override
@@ -27,7 +28,8 @@ public class AuctionWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        sessions.remove(session); // 移除会话
+        // 移除会话
+        sessions.remove(session);
     }
 
     // 推送消息给所有连接的客户端
