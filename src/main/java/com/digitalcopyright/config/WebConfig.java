@@ -50,6 +50,6 @@ public class WebConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 配置静态资源路径映射,将 uploads 目录映射到 /uploads 路径
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:/D:/艺溯之链/DigitalCopyright/uploads/");
+                .addResourceLocations("file:/D:/ChainOfArtTracing/DigitalCopyright/uploads/");
     }
 }
