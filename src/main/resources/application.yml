@@ -48,7 +48,7 @@ logging:
 
 fisco:
   contract:
-    address: "0xddc08e99560af0b2f0a3431d6c2c010ff1492d48"
+    address: "0x435aa1d0ffaad903fd0c1845b5b1a2069e9015cb"
     adminPrivateKey: dbd205db9627503e798e279eaecf4ca111ec82ca4f7e8acf8f13f986e1bccc3b
 
 

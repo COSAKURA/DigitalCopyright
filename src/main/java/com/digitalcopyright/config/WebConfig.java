@@ -36,6 +36,7 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://172.46.225.2:8089",
                         "http://172.46.225.3:8089",
                         "http://172.46.225.4:8089"
+
                 )
                 // 允许的 HTTP 方法
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
@@ -43,6 +44,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 // 允许发送 Cookie 或身份凭证
                 .allowCredentials(true)
+
                 // 预检请求的缓存时间，单位秒
                 .maxAge(3600);
     }
