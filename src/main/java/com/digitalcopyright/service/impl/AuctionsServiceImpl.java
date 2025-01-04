@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.digitalcopyright.common.AuctionWebSocketHandler;
 import com.digitalcopyright.fisco.DigitalCopyright;
 import com.digitalcopyright.mapper.AuctionsMapper;
+import com.digitalcopyright.mapper.PriceMapper;
 import com.digitalcopyright.mapper.UsersMapper;
 import com.digitalcopyright.mapper.WorksMapper;
 import com.digitalcopyright.model.DO.AuctionsDO;
+import com.digitalcopyright.model.DO.PriceDO;
 import com.digitalcopyright.model.DO.UsersDO;
 import com.digitalcopyright.model.DO.WorksDO;
 import com.digitalcopyright.service.AuctionsService;
@@ -44,6 +46,9 @@ public class AuctionsServiceImpl implements AuctionsService {
 
     @Resource
     private AuctionsMapper auctionsMapper;
+
+    @Resource
+    private PriceMapper priceMapper;
 
     @Resource
     private Client client;
@@ -163,12 +168,13 @@ public class AuctionsServiceImpl implements AuctionsService {
             throw new IllegalArgumentException("拍卖记录不存在，auction_id=" + auctionId);
         }
 
-        // 打印拍卖记录，检查拍卖状态
+        // 检查拍卖状态
         if (auction.getStatus() == 0) {
             throw new IllegalArgumentException("拍卖已结束，无法继续竞拍");
         } else if (auction.getStatus() != 1) {
             throw new IllegalArgumentException("无效的拍卖状态");
         }
+
         // 3. 验证出价是否高于当前出价
         if (bidAmount.compareTo(auction.getCurrentPrice()) <= 0) {
             throw new IllegalArgumentException("出价必须高于当前最高出价");
@@ -189,7 +195,6 @@ public class AuctionsServiceImpl implements AuctionsService {
             throw new IllegalArgumentException("作品拥有者不能参与竞拍");
         }
 
-
         // 6. 调用智能合约进行出价
         CryptoKeyPair userKeyPair = client.getCryptoSuite().createKeyPair(privateKey);
         DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, userKeyPair);
@@ -199,14 +204,30 @@ public class AuctionsServiceImpl implements AuctionsService {
             throw new RuntimeException("链上交易失败，交易状态: " + receipt.getStatus());
         }
 
+        // 获取交易哈希
+        String transactionHash = receipt.getTransactionHash();
+
         // 7. 更新拍卖记录的当前出价和最高出价者
         auction.setCurrentPrice(bidAmount);
-        // 更新最高出价者
         auction.setBuyerId(user.getId());
 
-        // 8. 使用 MyBatis-Plus 的 updateById 方法更新拍卖信息
+        // 更新拍卖记录
         if (auctionsMapper.updateById(auction) == 0) {
             throw new RuntimeException("更新拍卖记录失败");
+        }
+
+        // 8. 插入竞价记录到 price 表
+        PriceDO price = new PriceDO();
+        price.setAuctionId(auctionId);
+        price.setUserId(user.getId());
+        price.setPrice(bidAmount);
+        price.setWorkId(auction.getWorkId());
+        price.setTransactionHash(transactionHash);
+        price.setCreatedAt(LocalDateTime.now());
+
+        // 调用 priceMapper 插入数据
+        if (priceMapper.insert(price) == 0) {
+            throw new RuntimeException("插入竞价记录失败");
         }
 
         // 出价成功后，推送更新给所有客户端
@@ -221,6 +242,7 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 推送消息到 WebSocket
         AuctionWebSocketHandler.broadcast(message);
     }
+
 
     @Override
     @Transactional
@@ -377,8 +399,7 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 查询拍卖数据，增加 status = 1 的条件
         QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
         auctionWrapper.eq("work_id", workId);
-        // 只查询状态为 1 的拍卖数据
-        auctionWrapper.eq("status", 1);
+        auctionWrapper.eq("status", 1); // 只查询状态为 1 的拍卖数据
         AuctionsDO auction = auctionsMapper.selectOne(auctionWrapper);
 
         if (auction == null) {
@@ -387,7 +408,6 @@ public class AuctionsServiceImpl implements AuctionsService {
 
         // 查询作品数据
         QueryWrapper<WorksDO> workWrapper = new QueryWrapper<>();
-        // 使用正确的 workWrapper 查询条件
         workWrapper.eq("work_id", workId);
         WorksDO work = worksMapper.selectOne(workWrapper);
 
@@ -397,7 +417,6 @@ public class AuctionsServiceImpl implements AuctionsService {
 
         // 查询用户数据（假设作品表或拍卖表中包含 user_id 字段）
         QueryWrapper<UsersDO> userWrapper = new QueryWrapper<>();
-        // 通过作品的 user_id 查询用户信息
         userWrapper.eq("id", work.getUserId());
         UsersDO user = usersMapper.selectOne(userWrapper);
 
@@ -408,6 +427,29 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 判断当前用户是否是发起人（通过比较用户邮箱）
         boolean isOwner = currentUserEmail.equals(user.getEmail());
 
+        // 查询 price 表的所有出价记录
+        QueryWrapper<PriceDO> priceWrapper = new QueryWrapper<>();
+        priceWrapper.eq("auction_id", auction.getAuctionId()); // 根据拍卖 ID 查询出价记录
+        priceWrapper.orderByDesc("created_at"); // 按时间倒序排序
+        List<PriceDO> priceList = priceMapper.selectList(priceWrapper);
+
+        // 构造出价记录列表
+        List<Map<String, Object>> bids = new ArrayList<>();
+        for (PriceDO price : priceList) {
+            Map<String, Object> bid = new HashMap<>();
+
+            // 查询出价用户信息
+            UsersDO bidder = usersMapper.selectById(price.getUserId());
+            if (bidder != null) {
+                bid.put("username", bidder.getUsername());
+            }
+            bid.put("price", price.getPrice());
+            bid.put("transactionHash", price.getTransactionHash());
+            bid.put("createdAt", price.getCreatedAt());
+
+            bids.add(bid);
+        }
+
         // 封装拍卖数据、作品数据和用户数据到 Map 中
         result.put("auctionId", auction.getAuctionId());
         result.put("title", work.getTitle());
@@ -417,13 +459,13 @@ public class AuctionsServiceImpl implements AuctionsService {
         result.put("startPrice", auction.getStartPrice());
         result.put("currentPrice", auction.getCurrentPrice());
         result.put("endTime", auction.getEndTime());
-        // 添加用户名到结果中
         result.put("username", user.getUsername());
-        // 添加 isOwner 字段
         result.put("isOwner", isOwner);
+        result.put("bids", bids); // 添加出价记录列表
 
         return result;
     }
+
 
 
 }
