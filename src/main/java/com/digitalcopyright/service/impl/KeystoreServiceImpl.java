@@ -18,55 +18,56 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * @author Sakura
+ * Keystore 服务实现类
+ * 提供 Keystore 文件的生成、验证等功能，并更新用户的区块链地址。
+ * 作者: Sakura
  */
 @Service
 public class KeystoreServiceImpl implements KeystoreService {
 
     @Resource
-    private CryptoSuite cryptoSuite;
+    private CryptoSuite cryptoSuite; // 区块链加密套件，用于生成和验证密钥对
 
     @Resource
-    private UsersMapper usersMapper;
+    private UsersMapper usersMapper; // 用户表操作类
 
     private static final String BASE_PATH = new File("src/main/resources/privateKey").getAbsolutePath() + "/";
 
-
     /**
-     * 生成 Keystore 并更新用户的区块链地址。
-     *
+     * 生成 Keystore 并更新用户的区块链地址
      * @param email    用户邮箱
      * @param password 用户输入的密码
      * @return 用户的区块链地址
      */
     @Override
     public String generateKeystoreAndUpdateUser(String email, String password) throws Exception {
-        // 查询用户
+        // 1. 查询用户信息
         QueryWrapper<UsersDO> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("email", email);
         UsersDO user = usersMapper.selectOne(queryWrapper);
 
         if (user == null) {
+            // 如果用户不存在，抛出异常
             throw new IllegalArgumentException("用户不存在");
         }
 
-        // 创建 KeyPair
-        CryptoKeyPair keyPair = cryptoSuite.createKeyPair();
-        String userAddress = keyPair.getAddress();
+        // 2. 创建区块链密钥对
+        CryptoKeyPair keyPair = cryptoSuite.createKeyPair(); // 生成新的密钥对
+        String userAddress = keyPair.getAddress();           // 获取区块链地址
 
-        // 生成 Keystore 文件内容（加密后的私钥）
+        // 3. 生成 Keystore 文件内容（加密后的私钥）
         String privateKey = KeystoreUtils.generateKeystore(keyPair, password);
 
-        // 更新用户表
+        // 4. 更新用户表的区块链地址
         user.setBlockchainAddress(userAddress);
-        usersMapper.updateById(user);
+        usersMapper.updateById(user); // 更新用户信息
 
-        // 返回加密后的私钥内容
+        // 5. 返回加密后的私钥内容（供客户端保存）
         return privateKey;
     }
 
     /**
-     * 验证用户上传的 Keystore 文件并返回私钥。
+     * 验证用户上传的 Keystore 文件并返回私钥
      *
      * @param file              用户上传的 Keystore 文件
      * @param password          解密密码
@@ -75,30 +76,31 @@ public class KeystoreServiceImpl implements KeystoreService {
      */
     @Override
     public String loadKeyPairFromKeystore(MultipartFile file, String password, String blockchainAddress) throws IOException {
-        // 保存上传文件到临时路径
-        String tempDir = System.getProperty("java.io.tmpdir");
-        String filename = "keystore-" + System.currentTimeMillis() + ".json";
-        Path filePath = Paths.get(tempDir, filename);
-        Files.write(filePath, file.getBytes());
+        // 1. 保存上传的 Keystore 文件到临时路径
+        String tempDir = System.getProperty("java.io.tmpdir"); // 获取系统临时目录
+        String filename = "keystore-" + System.currentTimeMillis() + ".json"; // 临时文件名
+        Path filePath = Paths.get(tempDir, filename); // 文件路径
+        Files.write(filePath, file.getBytes()); // 写入文件内容
 
         try {
-            // 加载 Keystore 文件并解析私钥
+            // 2. 加载 Keystore 文件并解析私钥
             String userPrivateKey = KeystoreUtils.loadPrivateKeyFromKeystore(filePath.toString(), password);
 
-            // 创建 KeyPair 并验证区块链地址
+            // 3. 创建 KeyPair 并验证区块链地址
             CryptoKeyPair keyPair = cryptoSuite.createKeyPair(userPrivateKey);
             if (!keyPair.getAddress().equals(blockchainAddress)) {
+                // 如果解析的地址与传入的地址不匹配，抛出异常
                 throw new IllegalArgumentException("验证失败：上传的 Keystore 文件与区块链地址不匹配");
             }
 
-            // 返回私钥字符串
+            // 4. 返回私钥字符串
             return userPrivateKey;
         } catch (Exception e) {
+            // 捕获解析 Keystore 文件的异常并抛出运行时异常
             throw new RuntimeException("解析 Keystore 文件失败: " + e.getMessage(), e);
         } finally {
-            // 删除临时文件
+            // 5. 删除临时文件，确保文件不被泄漏
             Files.deleteIfExists(filePath);
         }
     }
-
 }

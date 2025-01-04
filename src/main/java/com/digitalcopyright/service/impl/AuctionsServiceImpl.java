@@ -38,23 +38,30 @@ import java.util.Map;
 @Service
 public class AuctionsServiceImpl implements AuctionsService {
 
+    // 用于操作用户表（`users`）的 MyBatis Mapper，提供用户信息的增删改查功能。
     @Resource
     private UsersMapper usersMapper;
 
+    // 用于操作作品表（`works`）的 MyBatis Mapper，负责管理作品相关的数据库记录。
     @Resource
     private WorksMapper worksMapper;
+
 
     @Resource
     private AuctionsMapper auctionsMapper;
 
+    // 用于操作竞价记录表（`price`）的 MyBatis Mapper，负责管理竞价数据
     @Resource
     private PriceMapper priceMapper;
 
+    // 区块链客户端，用于与区块链网络交互
     @Resource
     private Client client;
 
+    // 从配置文件中读取区块链智能合约地址，用于标识需要调用的目标智能合约。
     @Value("${fisco.contract.address}")
     private String CONTRACT_ADDRESS;
+
 
 
     @Override
@@ -65,6 +72,7 @@ public class AuctionsServiceImpl implements AuctionsService {
         userQuery.eq("email", email);
         UsersDO user = usersMapper.selectOne(userQuery);
         if (user == null || !"正常".equals(user.getStatus())) {
+            // 如果用户不存在或用户状态异常，抛出异常
             throw new IllegalArgumentException("用户不存在或状态异常，无法发起拍卖");
         }
 
@@ -73,28 +81,33 @@ public class AuctionsServiceImpl implements AuctionsService {
         workQuery.eq("work_id", workId);
         WorksDO work = worksMapper.selectOne(workQuery);
         if (work == null) {
+            // 如果作品不存在，抛出异常
             throw new IllegalArgumentException("作品不存在");
         }
 
         // 验证作品是否已申请版权
         if (work.getDigitalCopyrightId() == null) {
+            // 如果作品未申请版权，抛出异常
             throw new IllegalArgumentException("该作品尚未申请版权");
         }
 
-        // 验证作品是否已经在拍卖
+        // 验证作品是否已经在拍卖中
         if (work.getIsOnAuction()) {
+            // 如果作品已在拍卖中，抛出异常
             throw new IllegalArgumentException("该作品已在拍卖中");
         }
 
         // 调用智能合约开始拍卖
+        // 创建区块链私钥对（使用传入的用户私钥）
         CryptoKeyPair adminKeyPair = client.getCryptoSuite().createKeyPair(privateKey);
+        // 加载智能合约实例
         DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, adminKeyPair);
 
         // 调用智能合约方法开始拍卖
         TransactionReceipt receipt = digitalCopyright.startAuction(
-                workId, startPrice, BigInteger.valueOf(duration*1000));
+                workId, startPrice, BigInteger.valueOf(duration * 1000));
 
-        // 检查链上交易是否成功
+        // 检查链上交易是否成功（交易状态为 0x0 表示成功）
         if (!"0x0".equals(receipt.getStatus())) {
             throw new RuntimeException("链上交易失败，交易状态: " + receipt.getStatus());
         }
@@ -104,6 +117,7 @@ public class AuctionsServiceImpl implements AuctionsService {
         try {
             auctionCounter = digitalCopyright.auctionCounter();
         } catch (ContractException e) {
+            // 如果获取链上的拍卖ID失败，抛出异常
             throw new RuntimeException("获取链上的拍卖ID失败: " + e.getMessage(), e);
         }
 
@@ -111,46 +125,42 @@ public class AuctionsServiceImpl implements AuctionsService {
         work.setIsOnAuction(true);
         worksMapper.updateById(work);
 
-        // 获取当前时间戳（拍卖结束时间）
+        // 计算拍卖结束时间（当前时间 + 持续时间）
         LocalDateTime endTime = LocalDateTime.now().plusSeconds(duration);
 
-        // 获取链上交易哈希
+        // 获取链上交易的哈希值
         String transactionHash = receipt.getTransactionHash();
 
-        // 打印auction对象，确认数据是否正确
+        // 创建拍卖记录对象
         AuctionsDO auction = new AuctionsDO();
-        auction.setWorkId(workId);
-        // 假设作品的用户ID就是拍卖者ID
-        auction.setSellerId(work.getUserId());
-        auction.setStartPrice(startPrice);
-        // 初始价格即当前价格
-        auction.setCurrentPrice(startPrice);
-        // 尚未有出价者
-        auction.setBuyerId(null);
-        // 拍卖结束时间
-        auction.setEndTime(endTime);
-        // 1 表示拍卖中
-        auction.setStatus(1);
-        // 链上交易哈希
-        auction.setTransactionHash(transactionHash);
-        // 设置链上的拍卖ID
-        auction.setAuctionId(auctionCounter);
+        auction.setWorkId(workId); // 设置作品ID
+        auction.setSellerId(work.getUserId()); // 设置卖家ID（假设作品拥有者即为卖家）
+        auction.setStartPrice(startPrice); // 设置起拍价
+        auction.setCurrentPrice(startPrice); // 当前价格初始为起拍价
+        auction.setBuyerId(null); // 尚未有出价者
+        auction.setEndTime(endTime); // 设置拍卖结束时间
+        auction.setStatus(1); // 设置拍卖状态为进行中（1表示进行中）
+        auction.setTransactionHash(transactionHash); // 设置链上交易哈希
+        auction.setAuctionId(auctionCounter); // 设置链上的拍卖ID
 
-        // 确认auction对象的值
+        // 打印拍卖对象，供调试使用
         System.out.println("拍卖对象: " + auction);
 
         // 插入拍卖记录到数据库
         try {
             int result = auctionsMapper.insert(auction);
             if (result == 0) {
+                // 如果插入失败（返回值为0），抛出异常
                 throw new RuntimeException("拍卖信息插入失败，返回值为0");
             }
             System.out.println("拍卖信息成功插入数据库！");
         } catch (Exception e) {
+            // 捕获并打印插入数据库时的异常
             e.printStackTrace();
             throw new RuntimeException("插入拍卖信息到数据库失败: " + e.getMessage());
         }
     }
+
 
 
     @Override
@@ -159,47 +169,59 @@ public class AuctionsServiceImpl implements AuctionsService {
         // 1. 获取用户信息
         UsersDO user = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("email", email));
         if (user == null || !"正常".equals(user.getStatus())) {
+            // 如果用户不存在或用户状态异常，抛出异常
             throw new IllegalArgumentException("用户不存在或状态异常");
         }
 
-        // 2. 获取拍卖信息（通过 work_id 查询）
+        // 2. 获取拍卖信息（通过 auction_id 查询）
         AuctionsDO auction = auctionsMapper.selectOne(new QueryWrapper<AuctionsDO>().eq("auction_id", auctionId));
         if (auction == null) {
+            // 如果拍卖记录不存在，抛出异常
             throw new IllegalArgumentException("拍卖记录不存在，auction_id=" + auctionId);
         }
 
-        // 检查拍卖状态
+        // 检查拍卖状态是否有效
         if (auction.getStatus() == 0) {
+            // 如果拍卖已结束，抛出异常
             throw new IllegalArgumentException("拍卖已结束，无法继续竞拍");
         } else if (auction.getStatus() != 1) {
+            // 如果拍卖状态无效，抛出异常
             throw new IllegalArgumentException("无效的拍卖状态");
         }
 
-        // 3. 验证出价是否高于当前出价
+        // 3. 验证出价是否高于当前最高出价
         if (bidAmount.compareTo(auction.getCurrentPrice()) <= 0) {
+            // 如果出价低于或等于当前最高出价，抛出异常
             throw new IllegalArgumentException("出价必须高于当前最高出价");
         }
 
         // 4. 验证用户区块链地址
         String blockchainAddress = user.getBlockchainAddress();
         if (blockchainAddress == null || blockchainAddress.isEmpty()) {
+            // 如果用户区块链地址为空，抛出异常
             throw new IllegalArgumentException("用户的区块链地址为空");
         }
 
         // 5. 获取作品信息
         WorksDO work = worksMapper.selectOne(new QueryWrapper<WorksDO>().eq("work_id", auction.getWorkId()));
         if (work == null) {
+            // 如果作品不存在，抛出异常
             throw new IllegalArgumentException("作品不存在");
         }
         if (work.getUserId().equals(user.getId())) {
+            // 如果出价者是作品的拥有者，抛出异常
             throw new IllegalArgumentException("作品拥有者不能参与竞拍");
         }
 
         // 6. 调用智能合约进行出价
+        // 创建用户私钥对，用于签名交易
         CryptoKeyPair userKeyPair = client.getCryptoSuite().createKeyPair(privateKey);
+        // 加载智能合约实例
         DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, userKeyPair);
+        // 调用智能合约的出价方法
         TransactionReceipt receipt = digitalCopyright.placeBid(auctionId, bidAmount);
 
+        // 检查链上交易状态
         if (!"0x0".equals(receipt.getStatus())) {
             throw new RuntimeException("链上交易失败，交易状态: " + receipt.getStatus());
         }
@@ -208,102 +230,118 @@ public class AuctionsServiceImpl implements AuctionsService {
         String transactionHash = receipt.getTransactionHash();
 
         // 7. 更新拍卖记录的当前出价和最高出价者
-        auction.setCurrentPrice(bidAmount);
-        auction.setBuyerId(user.getId());
+        auction.setCurrentPrice(bidAmount); // 更新当前最高出价
+        auction.setBuyerId(user.getId());   // 更新最高出价者 ID
 
-        // 更新拍卖记录
+        // 更新拍卖记录到数据库
         if (auctionsMapper.updateById(auction) == 0) {
             throw new RuntimeException("更新拍卖记录失败");
         }
 
         // 8. 插入竞价记录到 price 表
         PriceDO price = new PriceDO();
-        price.setAuctionId(auctionId);
-        price.setUserId(user.getId());
-        price.setPrice(bidAmount);
-        price.setWorkId(auction.getWorkId());
-        price.setTransactionHash(transactionHash);
-        price.setCreatedAt(LocalDateTime.now());
+        price.setAuctionId(auctionId);         // 设置拍卖 ID
+        price.setUserId(user.getId());         // 设置出价者 ID
+        price.setPrice(bidAmount);             // 设置出价金额
+        price.setWorkId(auction.getWorkId());  // 设置作品 ID
+        price.setTransactionHash(transactionHash); // 设置链上交易哈希
+        price.setCreatedAt(LocalDateTime.now());  // 设置出价时间
 
-        // 调用 priceMapper 插入数据
+        // 插入竞价记录到数据库
         if (priceMapper.insert(price) == 0) {
             throw new RuntimeException("插入竞价记录失败");
         }
 
         // 出价成功后，推送更新给所有客户端
         Map<String, Object> auctionUpdate = new HashMap<>();
-        auctionUpdate.put("auctionId", auctionId);
-        auctionUpdate.put("currentPrice", bidAmount);
-        auctionUpdate.put("buyerId", user.getId());
+        auctionUpdate.put("auctionId", auctionId);       // 拍卖 ID
+        auctionUpdate.put("currentPrice", bidAmount);    // 当前最高出价
+        auctionUpdate.put("buyerId", user.getId());      // 最高出价者 ID
 
-        // 将更新的数据转换为 JSON 格式
+        // 将更新数据转换为 JSON 格式
         String message = new ObjectMapper().writeValueAsString(auctionUpdate);
 
-        // 推送消息到 WebSocket
+        // 推送消息到 WebSocket，通知所有客户端
         AuctionWebSocketHandler.broadcast(message);
     }
+
 
 
     @Override
     @Transactional
     public void endAuction(String email, BigInteger auctionId, String privateKey) {
         // 1. 获取用户信息
+        // 根据邮箱查询用户信息，确保用户存在并状态正常
         UsersDO user = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("email", email));
         if (user == null || !"正常".equals(user.getStatus())) {
+            // 如果用户不存在或状态异常，抛出异常
             throw new IllegalArgumentException("用户不存在或状态异常");
         }
 
-        // 2. 获取拍卖信息（通过 auctionId 查询）
+        // 2. 获取拍卖信息
+        // 根据拍卖 ID 查询拍卖记录
         AuctionsDO auction = auctionsMapper.selectOne(new QueryWrapper<AuctionsDO>().eq("auction_id", auctionId));
         if (auction == null) {
+            // 如果拍卖记录不存在，抛出异常
             throw new IllegalArgumentException("拍卖记录不存在，auction_id=" + auctionId);
         }
 
-        // 3. 检查拍卖状态，确保拍卖进行中
+        // 3. 检查拍卖状态
+        // 验证拍卖是否正在进行中（状态为 1 表示进行中）
         if (auction.getStatus() != 1) {
             throw new IllegalArgumentException("拍卖已结束");
         }
 
-        // 4. 确认当前用户是该拍卖的创建者
+        // 4. 验证用户是否为拍卖的创建者
+        // 确保当前用户是拍卖的卖家
         if (!auction.getSellerId().equals(user.getId())) {
-            throw new IllegalArgumentException("拍卖已结束");
+            throw new IllegalArgumentException("当前用户不是该拍卖的创建者");
         }
 
         // 5. 获取最高出价者信息
+        // 根据最高出价者的 ID 查询用户信息
         UsersDO highestBidder = usersMapper.selectById(auction.getBuyerId());
         if (highestBidder == null) {
+            // 如果找不到最高出价者，抛出异常
             throw new IllegalArgumentException("找不到最高出价者，拍卖结束");
         }
 
         // 6. 调用智能合约结束拍卖
+        // 使用用户的私钥创建区块链密钥对
         CryptoKeyPair userKeyPair = client.getCryptoSuite().createKeyPair(privateKey);
+        // 加载智能合约实例
         DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, userKeyPair);
+        // 调用合约的 `endAuction` 方法结束拍卖
         TransactionReceipt receipt = digitalCopyright.endAuction(auctionId);
 
-        // 7. 检查链上交易状态，确保交易成功
+        // 7. 检查链上交易状态
+        // 验证链上交易是否成功（状态为 0x0 表示成功）
         if (!"0x0".equals(receipt.getStatus())) {
             throw new RuntimeException("链上交易失败，交易状态: " + decodeRevertOutput(receipt.getOutput()));
         }
 
-        // 8. 更新作品的拥有者（将作品的 userId 改为最高出价者的 ID）
+        // 8. 更新作品拥有者信息
+        // 获取拍卖对应的作品信息
         WorksDO work = worksMapper.selectOne(new QueryWrapper<WorksDO>().eq("work_id", auction.getWorkId()));
         if (work == null) {
             throw new IllegalArgumentException("作品不存在，无法更改拥有者");
         }
 
-        // 更新作品拥有者为最高出价者
+        // 将作品的拥有者更改为最高出价者，同时设置作品不再处于拍卖状态
         work.setUserId(highestBidder.getId());
-        work.setIsOnAuction(false);  // 设置作品不再处于拍卖状态
+        work.setIsOnAuction(false);
         if (worksMapper.updateById(work) == 0) {
             throw new RuntimeException("更新作品信息失败，无法更改拥有者或结束拍卖状态");
         }
 
         // 9. 更新拍卖记录状态为已结束
-        auction.setStatus(0);  // 0表示拍卖已结束
+        // 将拍卖状态设置为 0（已结束）
+        auction.setStatus(0);
         if (auctionsMapper.updateById(auction) == 0) {
             throw new RuntimeException("更新拍卖记录失败，无法结束拍卖");
         }
 
+        // 打印结束拍卖成功信息
         System.out.println("拍卖结束成功，拍卖ID: " + auctionId + "，作品已转交给最高出价者: " + highestBidder.getEmail());
     }
 
@@ -332,12 +370,13 @@ public class AuctionsServiceImpl implements AuctionsService {
     public List<Map<String, Object>> getAllAuctions() {
         // 查询拍卖表中所有进行中的拍卖 (status = 1)
         QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
-        // 只查询进行中的拍卖
+        // 条件：只查询状态为 "进行中" 的拍卖
         auctionWrapper.eq("status", 1);
 
+        // 获取进行中的拍卖列表
         List<AuctionsDO> auctionList = auctionsMapper.selectList(auctionWrapper);
 
-        // 创建一个List来存放最终的返回结果
+        // 创建一个 List 来存放最终的返回结果
         List<Map<String, Object>> resultList = new ArrayList<>();
 
         // 遍历拍卖列表，为每个拍卖填充详细信息
@@ -347,90 +386,86 @@ public class AuctionsServiceImpl implements AuctionsService {
             // 查询作品信息：根据 workId 获取作品详情
             WorksDO work = worksMapper.selectOne(new QueryWrapper<WorksDO>().eq("work_id", auction.getWorkId()));
 
-            // 查询用户信息：根据卖家ID (sellerId) 获取用户名
+            // 查询用户信息：根据卖家ID (sellerId) 获取用户详情
             UsersDO seller = usersMapper.selectOne(new QueryWrapper<UsersDO>().eq("id", auction.getSellerId()));
 
             // 填充拍卖和作品的详细信息
-                // 拍卖ID
-            auctionMap.put("auctionId", auction.getAuctionId());
-            // 作品ID
-            auctionMap.put("workId", auction.getWorkId());
-            // 起始价格
-            auctionMap.put("startingPrice", auction.getStartPrice());
-            // 当前价格
-            auctionMap.put("currentPrice", auction.getCurrentPrice());
-            // 拍卖结束时间
-            auctionMap.put("endTime", auction.getEndTime());
+            auctionMap.put("auctionId", auction.getAuctionId()); // 拍卖ID
+            auctionMap.put("workId", auction.getWorkId());       // 作品ID
+            auctionMap.put("startingPrice", auction.getStartPrice()); // 起始价格
+            auctionMap.put("currentPrice", auction.getCurrentPrice()); // 当前价格
+            auctionMap.put("endTime", auction.getEndTime());     // 拍卖结束时间
 
             // 填充作品信息
             if (work != null) {
-                // 作品标题
-                auctionMap.put("title", work.getTitle());
-                // 区块哈希
-                auctionMap.put("blockHash", work.getBlockchainHash());
-                // 作品图片路径
-                auctionMap.put("imagePath", work.getImgUrl());
-                // 作品类别
-                auctionMap.put("category", work.getCategory());
+                auctionMap.put("title", work.getTitle());               // 作品标题
+                auctionMap.put("blockHash", work.getBlockchainHash());  // 区块链哈希
+                auctionMap.put("imagePath", work.getImgUrl());          // 作品图片路径
+                auctionMap.put("category", work.getCategory());         // 作品类别
             } else {
-                auctionMap.put("title", "未知作品");
+                auctionMap.put("title", "未知作品");                    // 如果作品信息缺失
                 auctionMap.put("blockHash", "未知");
                 auctionMap.put("imagePath", "");
                 auctionMap.put("category", "未知类别");
             }
 
             // 填充用户信息
-            auctionMap.put("username", (seller != null) ? seller.getUsername() : "未知用户");
+            auctionMap.put("username", (seller != null) ? seller.getUsername() : "未知用户"); // 卖家用户名
 
-            // 将当前拍卖信息Map添加到返回结果列表中
+            // 将当前拍卖信息 Map 添加到结果列表中
             resultList.add(auctionMap);
         }
 
-        // 返回封装好的结果
+        // 返回封装好的结果列表
         return resultList;
     }
 
 
 
+
     @Override
     public Map<String, Object> getAuctionById(Integer workId, String currentUserEmail) {
+        // 初始化结果 Map，用于存放拍卖、作品、用户及出价记录的详细信息
         Map<String, Object> result = new HashMap<>();
 
-        // 查询拍卖数据，增加 status = 1 的条件
+        // 查询拍卖数据（只查询状态为 1 的拍卖，表示拍卖正在进行中）
         QueryWrapper<AuctionsDO> auctionWrapper = new QueryWrapper<>();
         auctionWrapper.eq("work_id", workId);
-        auctionWrapper.eq("status", 1); // 只查询状态为 1 的拍卖数据
+        auctionWrapper.eq("status", 1); // 拍卖状态为进行中
         AuctionsDO auction = auctionsMapper.selectOne(auctionWrapper);
 
         if (auction == null) {
+            // 如果没有找到对应的拍卖信息，抛出异常
             throw new RuntimeException("未找到对应的正在进行中的拍卖信息");
         }
 
-        // 查询作品数据
+        // 查询作品数据（根据 workId）
         QueryWrapper<WorksDO> workWrapper = new QueryWrapper<>();
         workWrapper.eq("work_id", workId);
         WorksDO work = worksMapper.selectOne(workWrapper);
 
         if (work == null) {
+            // 如果没有找到对应的作品信息，抛出异常
             throw new RuntimeException("未找到对应的作品信息");
         }
 
-        // 查询用户数据（假设作品表或拍卖表中包含 user_id 字段）
+        // 查询用户数据（根据作品的 user_id 字段获取用户信息）
         QueryWrapper<UsersDO> userWrapper = new QueryWrapper<>();
         userWrapper.eq("id", work.getUserId());
         UsersDO user = usersMapper.selectOne(userWrapper);
 
         if (user == null) {
+            // 如果没有找到对应的用户信息，抛出异常
             throw new RuntimeException("未找到对应的用户信息");
         }
 
-        // 判断当前用户是否是发起人（通过比较用户邮箱）
+        // 判断当前用户是否是拍卖的发起人（通过比较用户邮箱）
         boolean isOwner = currentUserEmail.equals(user.getEmail());
 
-        // 查询 price 表的所有出价记录
+        // 查询出价记录（根据拍卖 ID 查询 price 表）
         QueryWrapper<PriceDO> priceWrapper = new QueryWrapper<>();
-        priceWrapper.eq("auction_id", auction.getAuctionId()); // 根据拍卖 ID 查询出价记录
-        priceWrapper.orderByDesc("created_at"); // 按时间倒序排序
+        priceWrapper.eq("auction_id", auction.getAuctionId()); // 根据拍卖 ID 查询
+        priceWrapper.orderByDesc("created_at"); // 按创建时间倒序排序
         List<PriceDO> priceList = priceMapper.selectList(priceWrapper);
 
         // 构造出价记录列表
@@ -441,31 +476,30 @@ public class AuctionsServiceImpl implements AuctionsService {
             // 查询出价用户信息
             UsersDO bidder = usersMapper.selectById(price.getUserId());
             if (bidder != null) {
-                bid.put("username", bidder.getUsername());
+                bid.put("username", bidder.getUsername()); // 出价者用户名
             }
-            bid.put("price", price.getPrice());
-            bid.put("transactionHash", price.getTransactionHash());
-            bid.put("createdAt", price.getCreatedAt());
+            bid.put("price", price.getPrice());               // 出价金额
+            bid.put("transactionHash", price.getTransactionHash()); // 链上交易哈希
+            bid.put("createdAt", price.getCreatedAt());       // 出价时间
 
             bids.add(bid);
         }
 
-        // 封装拍卖数据、作品数据和用户数据到 Map 中
-        result.put("auctionId", auction.getAuctionId());
-        result.put("title", work.getTitle());
-        result.put("description", work.getDescription());
-        result.put("imgUrl", work.getImgUrl());
-        result.put("digitalCopyrightId", work.getDigitalCopyrightId());
-        result.put("startPrice", auction.getStartPrice());
-        result.put("currentPrice", auction.getCurrentPrice());
-        result.put("endTime", auction.getEndTime());
-        result.put("username", user.getUsername());
-        result.put("isOwner", isOwner);
-        result.put("bids", bids); // 添加出价记录列表
+        // 封装拍卖数据、作品数据和用户数据到结果 Map 中
+        result.put("auctionId", auction.getAuctionId());          // 拍卖 ID
+        result.put("title", work.getTitle());                     // 作品标题
+        result.put("description", work.getDescription());         // 作品描述
+        result.put("imgUrl", work.getImgUrl());                   // 作品图片 URL
+        result.put("digitalCopyrightId", work.getDigitalCopyrightId()); // 作品版权 ID
+        result.put("startPrice", auction.getStartPrice());        // 起拍价
+        result.put("currentPrice", auction.getCurrentPrice());    // 当前最高出价
+        result.put("endTime", auction.getEndTime());              // 拍卖结束时间
+        result.put("username", user.getUsername());               // 卖家用户名
+        result.put("isOwner", isOwner);                           // 是否当前用户为发起人
+        result.put("bids", bids);                                 // 出价记录列表
 
+        // 返回封装好的结果
         return result;
     }
-
-
 
 }

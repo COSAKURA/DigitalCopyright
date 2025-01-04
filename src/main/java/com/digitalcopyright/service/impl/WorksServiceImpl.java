@@ -39,80 +39,101 @@ import static org.fisco.bcos.sdk.utils.AddressUtils.isValidAddress;
 @Slf4j
 public class WorksServiceImpl implements WorksService {
 
+    // 用户表操作类，提供对 `users` 数据表的操作
     @Resource
     private UsersMapper usersMapper;
 
+    // 作品表操作类，提供对 `works` 数据表的操作
     @Resource
     private WorksMapper worksMapper;
 
+    // FISCO BCOS 区块链客户端，用于与区块链交互
     @Resource
     private Client client;
 
+    // 通过配置文件 `application.properties` 或 `application.yml` 中的 `fisco.contract.address` 进行配置。
     @Value("${fisco.contract.address}")
-    private  String CONTRACT_ADDRESS;
+    private String CONTRACT_ADDRESS;
 
+    // 管理员的区块链私钥。
     @Value("${fisco.contract.adminPrivateKey}")
-    private  String adminPrivate;
+    private String adminPrivate;
+
 
     @Override
-    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email ) {
-        // 根据邮箱查找用户
+    public void registerWork(MultipartFile file, String title, String description, String privateKey, String email) {
+        // 1. 根据邮箱查找用户
         UsersDO user = fetchUserByEmail(email);
 
         try {
-            // 保存图片并获取文件路径
+            // 2. 保存上传的图片文件到本地，并返回文件路径
             String filePath = saveImageToLocal(file);
 
-            // 计算图片哈希值
+            // 3. 计算图片的哈希值（确保图片唯一性）
             String hash = calculateImageHash(Paths.get(System.getProperty("user.dir"), "uploads", filePath));
 
-            // 检查哈希值是否已存在
+            // 4. 验证图片哈希值是否已注册
             validateImageHash(hash);
 
-            // 从私钥生成 KeyPair
+            // 5. 使用用户提供的私钥生成区块链 KeyPair
             CryptoKeyPair userKeyPair = createKeyPair(privateKey);
 
-            // 加载智能合约
+            // 6. 加载智能合约
             DigitalCopyright digitalCopyright = DigitalCopyright.load(CONTRACT_ADDRESS, client, userKeyPair);
 
-            // 调用智能合约上传作品
+            // 7. 调用智能合约方法，注册作品信息
             TransactionReceipt receipt = digitalCopyright.registerWork(
-                    title,
-                    description,
-                    hash
+                    title,       // 作品标题
+                    description, // 作品描述
+                    hash         // 图片哈希值（唯一标识）
             );
 
-            // 获取链上返回的作品 ID 和交易哈希
+            // 8. 获取链上返回的作品 ID
             BigInteger workIdOnChain = getWorkIdFromReceipt(digitalCopyright);
 
-            // 构建 RegisterWorkDTO
+            // 9. 构建 DTO 对象，便于后续存储数据库
             RegisterWorkDTO registerWorkDTO = new RegisterWorkDTO();
             registerWorkDTO.setTitle(title);
             registerWorkDTO.setDescription(description);
 
-            // 保存作品信息到数据库
+            // 10. 将作品信息保存到数据库
             saveWorkToDatabase(registerWorkDTO, user, filePath, hash, workIdOnChain, receipt.getTransactionHash());
 
         } catch (IllegalArgumentException e) {
-            throw e; // 直接抛出业务异常
+            // 捕获业务异常（如非法参数、哈希冲突等），直接抛出
+            throw e;
         } catch (Exception e) {
+            // 捕获其他异常，抛出运行时异常
             throw new RuntimeException("作品注册失败: " + e.getMessage(), e);
         }
     }
 
 
+
     /**
      * 根据邮箱获取用户信息
+     *
+     * @param email 用户的邮箱地址
+     * @return 用户信息对象（UsersDO）
+     * @throws IllegalArgumentException 如果用户不存在，则抛出异常
      */
     private UsersDO fetchUserByEmail(String email) {
+        // 使用 MyBatis-Plus 的 QueryWrapper 构建查询条件
         QueryWrapper<UsersDO> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("email", email);
+        queryWrapper.eq("email", email); // 查询条件：email 字段等于指定的邮箱
+
+        // 执行查询操作，返回单个用户对象
         UsersDO user = usersMapper.selectOne(queryWrapper);
+
+        // 如果查询结果为空，说明用户不存在
         if (user == null) {
-            throw new IllegalArgumentException("用户不存在");
+            throw new IllegalArgumentException("用户不存在"); // 抛出非法参数异常，提示用户信息不存在
         }
+
+        // 返回查询到的用户对象
         return user;
     }
+
 
     /**
      * 保存图片到本地并返回文件路径
